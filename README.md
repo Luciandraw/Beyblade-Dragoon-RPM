@@ -1,70 +1,83 @@
 # Beyblade X RPM Analyzer
 
-USB-установщик для GitHub Pages: инструкция подготовки и публикации — [WEB_INSTALLER.md](WEB_INSTALLER.md). Страница находится в `docs`, ручная сборка и публикация — в `.github/workflows/web-installer.yml`. До появления полного merged-образа установка заблокирована.
+An ESP32-S3-Zero launch-speed analyzer with an analog QRE1113 optical sensor and a 200 × 200 e-paper display. The sensor reads a half-white, half-black disk (one period per revolution). The firmware detects launches automatically, calculates average and peak RPM, and stores the last 20 results.
 
-Измеритель скорости запуска на ESP32-S3-Zero. Аналоговый QRE1113 читает диск с одной белой и одной чёрной половиной (один период на оборот); прошивка автоматически обнаруживает запуск, вычисляет средний и пиковый RPM, хранит 20 результатов и выводит их на e-paper 200×200.
+[Project website](https://luciandraw.github.io/Beyblade-Dragoon-RPM/) · [3D assembly](https://luciandraw.github.io/Beyblade-Dragoon-RPM/model.html) · [Wiring diagram](https://luciandraw.github.io/Beyblade-Dragoon-RPM/wiring.html)
 
-## Распиновка
+## Website and firmware
 
-| Сигнал | ESP32-S3-Zero |
-|---|---:|
-| QRE1113 OUT через 1 кОм | GPIO1 (ADC1_CH0) |
-| E-paper RES, D/C, SCL, BUSY, SDA, CS | GPIO4, 5, 6, 7, 8, 9 |
-| Кнопка наличия блейда → GND | GPIO10 |
-| Единственная центральная кнопка → GND | GPIO11 |
+The English website includes an interactive wiring diagram, a 3D viewer with exploded assembly and clean wireframe modes, and a browser-based USB installer.
 
-QRE1113 и e-paper питаются только от `3V3`; земли общие. `SCL` и `SDA` дисплея — это **SPI SCK и MOSI**, не I²C. Оставьте дисплей в режиме 4-line SPI.
+## Pinout
 
-LiPo подключается к `B+`/`B-` зарядно-повышающего модуля. До подключения ESP32 установите мультиметром **ровно 5.0 В** между `VO+` и `VO-` (не выше примерно 5.2 В). `VO+` идёт через выключатель на `5V` ESP32, `VO-` — прямо на GND. Зарядка USB-C остаётся доступна при выключенном устройстве.
+| Signal | ESP32-S3-Zero |
+|---|---|
+| QRE1113 OUT through 1 kΩ | GPIO1 (ADC1_CH0) |
+| E-paper RES | GPIO4 |
+| E-paper D/C | GPIO5 |
+| E-paper SCL | GPIO6 |
+| E-paper BUSY | GPIO7 |
+| E-paper SDA | GPIO8 |
+| E-paper CS | GPIO9 |
+| Blade-present button → GND | GPIO10 |
+| Central button → GND | GPIO11 |
+
+Power the QRE1113 and e-paper from `3V3` in this build, with a common ground. Display `SCL` and `SDA` mean **SPI SCK and MOSI**, not I²C. Keep the display in 4-line SPI mode.
+
+Connect the LiPo to `B+`/`B-` on the charge-and-boost module. Before connecting the ESP32, use a multimeter to adjust the output between `VO+` and `VO-` to **5.0 V**. Connect `VO+` through the power switch to ESP32 `5V`, and `VO-` directly to GND. USB-C charging remains available with the device switched off. Keep the power switch off when connecting the ESP32 to a computer over USB.
 
 ## Arduino IDE
 
-1. Установите пакет плат **esp32 by Espressif Systems** и библиотеку **GxEPD2 by Jean-Marc Zingg**.
-2. Откройте [main/main.ino](main/main.ino) и выберите точный профиль `Waveshare ESP32-S3-Zero`.
-3. Выберите USB Mode `Hardware CDC and JTAG`, `USB CDC On Boot: Enabled`, Flash Mode `QIO 80MHz`, PSRAM `Enabled` (на этой плате QSPI), Partition Scheme `Default 4MB with spiffs`.
-4. При первом переходе с другого профиля включите `Erase All Flash Before Sketch Upload: Enabled`, загрузите прошивку, затем верните эту настройку в `Disabled`.
-4. Выберите COM-порт, загрузите скетч и откройте Serial Monitor на 115200 бод.
+1. Install **esp32 by Espressif Systems** and **GxEPD2 by Jean-Marc Zingg**. The packaged export uses ESP32 core **3.3.11**.
+2. Open [main/main.ino](main/main.ino) and select `Waveshare ESP32-S3-Zero`.
+3. Select USB Mode `Hardware CDC and JTAG`, `USB CDC On Boot: Enabled`, Flash Mode `QIO 80MHz`, PSRAM `Disabled` (matching the tested build), and Partition Scheme `Default 4MB with spiffs`.
+4. When switching from another board profile for the first time, enable `Erase All Flash Before Sketch Upload`, upload, then return it to `Disabled`. This clears saved data.
+5. Select the COM port, upload the sketch, and open Serial Monitor at 115200 baud if diagnostics are needed.
 
-Те же исходники собираются PlatformIO из корня: `platformio.ini` задаёт `src_dir = main`.
+The project also includes a PlatformIO configuration: `platformio.ini` sets `src_dir = main`. The packaged release is the Arduino IDE export, not a separately verified PlatformIO build.
 
-## Работа
+## Operation
 
-При включении отдельная калибровка больше не требуется: прошивка использует измеренные на собранном устройстве пороги из `config.h` и сразу переходит к ожиданию блейда. Если положение датчика или освещение изменилось, ручная калибровка остаётся доступной из меню. При `SENSOR ALIGN` отрегулируйте зазор примерно до 0.5–1.5 мм и закройте датчик от внешнего света.
+Startup uses thresholds measured on the assembled device and stored in `config.h`; a separate calibration step is no longer required. Manual calibration remains available if sensor position or lighting changes. In `SENSOR ALIGN`, adjust the gap to approximately 0.5–1.5 mm and shield the sensor from ambient light.
 
-Сначала устройство показывает `INSERT BLADE`. Кнопка наличия на GPIO10 должна замкнуться на GND при установленном блейде; после этого появляется READY. Готовность защёлкивается, поэтому отпускание кнопки при выстреле не отменяет измерение. Запуск начинается по QRE1113 после трёх однотипных переходов за 200 мс; остановка фиксируется через 250 мс без переходов. Это ограничивает измерение очень медленного вращения независимо от нижней границы фильтра 10 RPM. Во время измерения экран и NVS не обновляются. Перед протяжкой дождитесь завершения обновления READY: синхронное обновление e-paper блокирует обработку ADC примерно на 1,5 секунды.
+The device initially shows `INSERT BLADE`. The blade-present button on GPIO10 must connect to GND when a blade is installed; the display then shows `READY`. The armed state is latched, so releasing the button during launch does not cancel measurement.
 
-- Короткое нажатие: открыть меню или перейти к следующему пункту.
-- Двойное нажатие (интервал до 350 мс): подтвердить выбор.
-- Удержание около 1 секунды: вернуться назад или повторить калибровку из READY.
-- Удержание около 3 секунд: сервисный экран.
+A launch starts after three same-direction QRE1113 transitions within 200 ms. Measurement ends after 250 ms without transitions. This limits very slow rotation measurements regardless of the filter's 10 RPM lower bound. The display and NVS are not updated during measurement. Wait for the READY refresh to finish before pulling: synchronous e-paper refresh blocks ADC processing for approximately 1.5 seconds.
 
-В сервисном экране автоматического обновления нет, чтобы e-paper не мешал подсчёту быстрых переходов. Выполните протяжку, затем коротко нажмите кнопку для обновления показаний; удержание около секунды закрывает экран.
+### Central button
 
-Меню содержит историю, график последнего запуска, калибровку и очистку истории с подтверждением.
+- Short press: open the menu or move to the next item.
+- Double-click (up to 350 ms between clicks): confirm selection.
+- Hold approximately 1 second: go back or recalibrate from READY.
+- Hold approximately 3 seconds: open the service screen.
 
-## Настройка и аппаратные допущения
+The service screen does not refresh automatically, so e-paper updates do not interfere with fast transition counting. Pull the launcher, then press briefly to refresh readings. Hold approximately one second to exit.
 
-Все параметры находятся в [main/config.h](main/config.h): GPIO, частота ADC, контраст, гистерезис, `SENSOR_INVERTED`, фильтры, пределы RPM, число периодов и `DRIVE_RATIO`.
+The menu includes launch history, the latest launch graph, calibration, and history clearing with confirmation.
 
-Расчёт использует только переходы LOW→HIGH: `RPM = 60000000 × DRIVE_RATIO / (periodUs × ENCODER_PERIODS_PER_REV)`. Для этого диска число периодов равно 1, передаточное отношение — 1:1.
+## Configuration and measurement assumptions
 
-ADC работает через ESP-IDF continuous DMA с заданной частотой 80 кГц; это настройка, а не независимое измерение частоты. При ошибке начальной инициализации остаётся более медленный `analogRead()`.
+Parameters in [main/config.h](main/config.h) include GPIO assignments, ADC rate, contrast, hysteresis, `SENSOR_INVERTED`, filters, RPM limits, periods per revolution, and `DRIVE_RATIO`.
 
-Для устойчивости измерения:
+The calculation uses LOW → HIGH transitions only:
 
-- Фильтрация ADC и гистерезис дополнены подтверждением перехода в течение 75 мкс. Время перехода фиксируется в начале подтверждения.
-- Невозможный ранний импульс не сдвигает начало следующего периода.
-- Резкий разгон не отбрасывается по процентному скачку RPM.
-- Небольшое опережение часов временной меткой DMA не вызывает ложную остановку замера.
-- `PEAK` — медиана трёх самых быстрых отдельных оборотов (при двух оборотах — максимум). Текущая скорость и график сглаживаются медианой до пяти периодов. `AVG` рассчитывается по суммарному времени принятых периодов.
-- Буфер DMA увеличен до 64 кадров. Переполнение, ошибка чтения или длительная пауза разрывают поток: незавершённый замер сбрасывается, оборот через потерянный участок не вычисляется.
+```text
+RPM = 60000000 × DRIVE_RATIO / (periodUs × ENCODER_PERIODS_PER_REV)
+```
 
-Прошивка не удваивает RPM автоматически при длинном периоде: по одному оптическому каналу нельзя однозначно отличить пропущенный оборот от замедления.
+For the half-white, half-black disk, there is one period per revolution and the drive ratio is 1:1.
 
-Арифметические регрессионные проверки находятся в `diagnostics/rpm_regression/rpm_regression.ino`. Это отдельный скетч без датчика и дисплея: после загрузки выводит PASS/FAIL в Serial через 3 секунды. Его загрузка заменяет основную прошивку; после проверки загрузите `main` заново. Компиляция теста сама по себе не означает, что проверки выполнены на плате.
+ADC sampling uses ESP-IDF continuous DMA configured for 80 kHz. This is a configured rate, not an independently measured rate. If initial DMA setup fails, sampling falls back to slower `analogRead()`.
 
-По умолчанию выбран `GxEPD2_154_D67` (SSD1681/GDEY0154D67), наиболее вероятный вариант WeAct 1.54″ 200×200. Сверьте маркировку шлейфа. Для другой панели замените `using Panel` в [main/display.cpp](main/display.cpp) на класс из примеров GxEPD2. После нескольких partial refresh выполняется full refresh против ghosting.
+Measurement stability measures:
 
-Устройство не имеет RTC, поэтому `timestamp` — номер запуска. Wi-Fi и BLE не инициализируются; `publishLaunchResult()` оставлен пустым для будущего BLE.
+- ADC filtering and hysteresis with 75 µs transition confirmation. The timestamp is recorded at the start of confirmation.
+- An impossibly early pulse does not shift the start of the next period.
+- Sharp acceleration is not rejected solely because of a percentage RPM jump.
+- A DMA timestamp slightly ahead of the clock does not trigger a false timeout.
+- `PEAK` is the median of the three fastest individual revolutions; with two revolutions, it uses the maximum. Current speed and the graph use a median of up to five periods. `AVG` uses the total duration of accepted periods.
+- A 64-frame DMA buffer. Overflow, read errors, or long pauses break the stream: unfinished measurements are reset, and no revolution is calculated across missing data.
 
-На реальном устройстве необходимо проверить: класс панели, `SENSOR_INVERTED`, ADC min/max, контраст и гистерезис, частоту ADC, передаточное отношение и максимальный реальный RPM.
+The firmware does not automatically double RPM after a long period: a single optical channel cannot unambiguously distinguish a missed revolution from slowing.
+
+

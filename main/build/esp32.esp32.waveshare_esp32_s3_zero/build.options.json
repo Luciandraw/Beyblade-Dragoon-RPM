@@ -1,0 +1,10 @@
+{
+  "additionalFiles": "..\\..,..\\..,..\\..,..\\..,..\\..,..\\..,..\\..,..\\..,..\\..,..\\..,..\\..,..\\..,..\\..,..\\..,..\\..,..\\..",
+  "builtInLibrariesFolders": "C:\\Users\\lucia\\AppData\\Local\\Arduino15\\libraries",
+  "compiler.optimization_flags": "-Os",
+  "customBuildProperties": "",
+  "fqbn": "esp32:esp32:waveshare_esp32_s3_zero:UploadSpeed=921600,USBMode=hwcdc,CDCOnBoot=default,MSCOnBoot=default,DFUOnBoot=default,UploadMode=default,CPUFreq=240,FlashMode=qio,PartitionScheme=default,DebugLevel=none,PSRAM=disabled,LoopCore=1,EventsCore=1,EraseFlash=none",
+  "hardwareFolders": "C:\\Users\\lucia\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\3.3.11,C:\\Users\\lucia\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\3.3.11",
+  "otherLibrariesFolders": "d:\\ArduinoProjects\\MacMini\\Arduino\\libraries\\libraries",
+  "sketchLocation": "D:\\ArduinoProjects\\BeybladeRPM\\main"
+}
