@@ -1,3 +1,7 @@
 {
-  "ready": false
+  "ready": true,
+  "version": "1.0.0",
+  "file": "beyblade-rpm-1.0.0-1ef7254f4c1e.bin",
+  "size": 4194304,
+  "sha256": "1ef7254f4c1e856f6b882bdd486983b8e096c5582874adab755be2c9a721bf10"
 }

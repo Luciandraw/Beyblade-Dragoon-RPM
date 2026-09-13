@@ -1,0 +1,17 @@
+{
+  "name": "Beyblade RPM Analyzer",
+  "version": "1.0.0",
+  "new_install_prompt_erase": false,
+  "new_install_improv_wait_time": 0,
+  "builds": [
+    {
+      "chipFamily": "ESP32-S3",
+      "parts": [
+        {
+          "path": "beyblade-rpm-1.0.0-1ef7254f4c1e.bin",
+          "offset": 0
+        }
+      ]
+    }
+  ]
+}
