@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="dark">
+<title>Beyblade RPM — 3D viewer</title><meta name="description" content="Explore the Launcher V2 assembly in 3D.">
+<link rel="icon" href="./favicon.svg"><link rel="stylesheet" href="./style.css"><link rel="stylesheet" href="./model.css">
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"}}</script>
+<script type="module" src="./model.js"></script>
+</head><body><main>
+<header><a href="./" class="brand"><span class="brand-mark" aria-hidden="true">R</span><span>BEYBLADE <b>RPM</b></span></a><a href="./wiring.html">← Wiring guide</a></header>
+<div class="page-heading"><p class="eyebrow">HARDWARE / 3D ASSEMBLY</p><h1>Launcher <em>V2.</em></h1><p>Drag to rotate. Scroll or pinch to zoom. Right-drag to pan.</p></div>
+<section class="model-shell" aria-label="Launcher V2 interactive model">
+<div id="viewport" aria-label="3D model canvas"></div>
+<div class="model-toolbar"><button id="load-model" type="button">Load 3D model · 12.1 MB</button><button id="reset-camera" type="button" disabled>Fit view</button><button id="explode-model" type="button" disabled>Explode assembly</button><button id="assemble-model" type="button" disabled>Assemble</button><button id="clear-selection" type="button" disabled>Clear selection</button></div>
+<div class="model-toolbar render-toolbar"><button id="wireframe-mode" type="button" aria-pressed="false" aria-describedby="wireframe-hint" disabled>Wireframe</button><span id="wireframe-hint">Clean feature edges · hidden rear lines · cyan selection</span></div>
+<div class="explosion-control"><label for="explosion">Assembly separation <output id="explosion-value">0%</output></label><input id="explosion" type="range" min="0" max="100" value="0" disabled><div><span>Assembled</span><span>Exploded</span></div></div>
+<p id="model-status" role="status" aria-live="polite">The model downloads only when you press Load. WebGL 2 is required.</p>
+</section>
+<details class="model-parts" open><summary>Assembly parts — select to highlight <span aria-hidden="true">+</span></summary><div id="parts"><p>Load the model to see its parts.</p></div></details>
+<p class="model-note">Click a part in the model or list to highlight it. All parts remain visible. Separation is illustrative, not a physical disassembly sequence. Geometry supplied in LauncherV2.glb; original part names and geometry are preserved. This is not an electrical wiring simulation.</p>
+<noscript><p>Enable JavaScript for 3D viewing.</p></noscript>
+<footer><a href="./wiring.html">Wiring guide →</a><a href="./">Firmware installer →</a></footer>
+</main></body></html>

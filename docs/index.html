@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Install Beyblade RPM Analyzer firmware on your ESP32-S3-Zero directly over USB.">
+  <meta name="color-scheme" content="dark">
+  <title>Beyblade RPM — Build. Explore. Launch.</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="./home.css">
+  <script type="module" src="./app.js"></script>
+</head>
+<body class="home">
+  <a class="skip-link" href="#installer">Skip to installer</a>
+  <main>
+    <header><a href="./" class="brand"><span class="brand-mark" aria-hidden="true">R</span><span>BEYBLADE <b>RPM</b></span></a><nav aria-label="Main navigation"><a href="./model.html">3D assembly</a><a href="./wiring.html">Wiring diagram</a><a href="#installer">Firmware</a></nav></header>
+    <section class="home-hero" aria-labelledby="hero-title">
+      <div class="hero-copy"><p class="eyebrow">LAUNCHER V2 / RPM ANALYZER</p><h1 id="hero-title">Every launch.<br><em>In detail.</em></h1><p>Explore the assembly. Connect your hardware.<br>Get your analyzer ready for the next launch.</p><div class="hero-actions"><a class="primary-link" href="./model.html">Explore in 3D <span aria-hidden="true">↗</span></a><a href="./wiring.html">Open wiring diagram <span aria-hidden="true">→</span></a></div></div>
+      <span class="hero-caption" aria-hidden="true">EXPLODED ASSEMBLY / LAUNCHER V2</span>
+    </section>
+    <nav class="explore-grid" aria-label="Project tools">
+      <a href="./model.html"><span class="eyebrow">01 / EXPLORE</span><h2>3D assembly <span aria-hidden="true">↗</span></h2><p>Rotate, separate and inspect every part.</p></a>
+      <a href="./wiring.html"><span class="eyebrow">02 / CONNECT</span><h2>Wiring diagram <span aria-hidden="true">↗</span></h2><p>Trace each wire from contact to contact.</p></a>
+      <a href="#installer"><span class="eyebrow">03 / INSTALL</span><h2>Firmware <span aria-hidden="true">↓</span></h2><p>Prepare your ESP32-S3 directly over USB.</p></a>
+    </nav>
+    <div class="install-intro"><p class="eyebrow">THE LAUNCH STARTS HERE</p><h2>Flash. Reset. Launch.</h2><p>Install your RPM Analyzer firmware directly from your browser.</p></div>
+    <div class="workspace">
+      <section id="installer" class="installer" aria-labelledby="install-title">
+        <div class="panel-heading"><div><p class="eyebrow">USB INSTALLER</p><h2 id="install-title">Prepare your next launch.</h2></div><span class="panel-number" aria-hidden="true">01</span></div>
+        <dl class="specs"><div><dt>BOARD</dt><dd>ESP32-S3-Zero</dd></div><div><dt>FLASH</dt><dd>4 MB</dd></div><div><dt>PSRAM</dt><dd>QSPI</dd></div></dl>
+        <div class="release"><span>Firmware version</span><strong id="version">Not published</strong></div>
+        <p id="status" role="status" aria-live="polite">Checking firmware availability…</p>
+        <div class="warning"><span class="warning-mark" aria-hidden="true">!</span><div><strong>A fresh install clears your data</strong><p>Launch history, personal bests and saved settings will be erased. Keep USB connected until installation finishes.</p></div></div>
+        <label class="consent"><input id="consent" type="checkbox" disabled><span>I have the board and memory listed above, and agree to erase its data.</span></label>
+        <div id="install-host"><button disabled>Install firmware <span aria-hidden="true">↗</span></button></div>
+        <noscript><p>Enable JavaScript to use the USB installer.</p></noscript>
+        <p class="browser-note">Chrome or Edge on desktop <span aria-hidden="true">·</span> No Arduino IDE required</p>
+      </section>
+      <aside class="guide" aria-labelledby="steps-title">
+        <p class="eyebrow">BEFORE YOU FLASH</p><h2 id="steps-title">Three steps.<br>One USB cable.</h2>
+        <ol>
+          <li><strong>Plug in your analyzer</strong><p>Use a data-capable USB cable. Close Arduino Serial Monitor and any other app using the device’s port.</p></li>
+          <li><strong>Select your device</strong><p>Confirm the checkbox, click install and choose your board’s USB port. Review and confirm the installation in the dialog.</p></li>
+          <li><strong>Reset &amp; get ready</strong><p>Wait for the success message. Press RESET if needed, then let the READY screen finish refreshing before launching.</p></li>
+        </ol>
+        <div class="compatibility"><span class="eyebrow">HARDWARE CHECK</span><p>Built for this analyzer’s ESP32-S3-Zero wiring. Not for ESP32-C3 or RP2040.</p><a href="./wiring.html">Explore the interactive wiring guide →</a></div>
+      </aside>
+    </div>
+    <section class="help" aria-labelledby="help-title"><div><p class="eyebrow">QUICK ANSWERS</p><h2 id="help-title">Need a hand?</h2></div><div class="questions">
+      <details><summary>My board won’t connect <span aria-hidden="true">+</span></summary><p>Hold BOOT, briefly press RESET, then release BOOT. Select the USB port again — its number may have changed. After installation, press RESET without holding BOOT.</p><p>If the board heats up rapidly, disconnect power and check the wiring. Reflashing does not fix a short circuit.</p></details>
+      <details><summary>Can I use another board? <span aria-hidden="true">+</span></summary><p>This image is for the Beyblade RPM build on ESP32-S3-Zero with 4 MB Flash and QSPI PSRAM. The installer checks the chip family, not the board model, memory configuration or wiring.</p></details>
+      <details><summary>Why is the install button disabled? <span aria-hidden="true">+</span></summary><p>A firmware release must be available and pass its file integrity check first. Then confirm the board and data-erasure checkbox. Use a supported desktop browser over HTTPS, or localhost for a local preview.</p></details>
+    </div></section>
+    <footer><span>BEYBLADE RPM <span class="footer-divider">/</span> Independent analyzer project</span><a href="https://esphome.github.io/esp-web-tools/" target="_blank" rel="noopener noreferrer">Powered by ESP Web Tools ↗</a></footer>
+  </main>
+</body>
+</html>

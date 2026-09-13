@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="Interactive component and wiring guide for the Beyblade RPM ESP32-S3-Zero analyzer.">
+  <title>Beyblade RPM — Wiring guide</title>
+  <link rel="icon" href="./favicon.svg"><link rel="stylesheet" href="./style.css"><link rel="stylesheet" href="./wiring.css">
+  <script type="module" src="./wiring.js"></script>
+</head>
+<body><a class="skip-link" href="#components">Skip to components</a><main>
+  <header><a href="./" class="brand"><span class="brand-mark" aria-hidden="true">R</span><span>BEYBLADE <b>RPM</b></span></a><a href="./">← Firmware installer</a></header>
+  <div class="page-heading"><p class="eyebrow">HARDWARE / ESP32-S3-ZERO</p><h1>Wiring <em>guide.</em></h1><p>Select a component to see its pin mapping. <a href="./model.html">Explore the 3D assembly →</a></p></div>
+  <div class="wiring-layout">
+    <section class="circuit" aria-label="Interactive component map">
+      <div class="map-heading"><span class="eyebrow">ESP32-S3-ZERO BUILD</span><span class="map-tag">3.3 V LOGIC</span></div>
+      <div class="map-area">
+        <div id="components" class="component-grid" role="group" aria-label="Choose a component"></div>
+        <div id="contact-view" aria-live="polite"></div>
+      </div>
+      <p class="map-caption">Each wire has its own color, matching its label and Connection detail row. Select a wire label to isolate it. Different-colored GND wires still join the same common ground bus. Crossings without dots are not junctions. Verify contact pairs before powering on.</p>
+    </section>
+    <section class="connection-panel" aria-labelledby="component-title">
+      <p class="eyebrow">CONNECTION DETAIL</p><div id="connection-detail" aria-live="polite" aria-atomic="true"></div>
+    </section>
+  </div>
+  <section class="power-notes" aria-labelledby="safe-title"><p class="eyebrow">BEFORE POWER ON</p><h2 id="safe-title">Check twice. Connect once.</h2>
+    <div class="safety-grid"><p><strong>Set the boost to 5.0 V.</strong> Measure between VO+ and VO− before connecting the ESP32. Screen and sensor use ESP 3V3, never the boost output.</p><p><strong>Switch OFF for USB flashing.</strong> Disconnect battery-powered output from ESP 5V before using the ESP USB-C port. Do not assume the two sources are isolated.</p><p><strong>Keep the protection path intact.</strong> Battery negative goes to B−. Use VO− as common GND; do not add a B− to VO− bridge.</p><p><strong>Verify mechanical contacts.</strong> With power disconnected, find the switch COM and button contact pairs using a multimeter. Button contacts must close only when pressed.</p></div>
+  </section>
+  <noscript><p>This interactive map needs JavaScript. Use the <a href="./assets/components-review.png">static wiring reference</a>.</p></noscript>
+  <footer><span>BEYBLADE RPM / ESP32-S3-Zero</span><a href="./">Back to firmware installer →</a></footer>
+</main></body></html>
