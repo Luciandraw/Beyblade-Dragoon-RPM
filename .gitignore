@@ -1,0 +1,10 @@
+.arduino-build-libs/
+.build*/
+.module-check/
+.pio/
+firmware-build/
+main/build/
+node_modules/
+__pycache__/
+BeybladeRPM-*.zip
+Meshes/
