@@ -56,7 +56,6 @@ All links below are AliExpress alternatives. Delivery availability, taxes and di
 
 ### Before ordering
 
-- The Polish central button is **13 mm tall**, whereas the supplied parts list specifies **12 mm**. Check enclosure clearance; these are not identical variants.
 - Switch alternatives may differ in footprint and contact arrangement. Confirm fit and identify the common/switched contacts before wiring.
 - Check the battery's permitted charge current against the charger configuration; do not assume a module's default setting is suitable for a small 200 mAh cell. Set the boost output to **5.0 V before connecting the ESP32**.
 - Also allow for the 1 kΩ sensor resistor, wire, solder, fasteners and printed enclosure. These were not priced in the supplied shopping list.
