@@ -56,6 +56,8 @@ All links below are AliExpress alternatives. Delivery availability, taxes and di
 
 ### Before ordering
 
+- **Pin headers are optional:** the wires supplied with the display can be used instead of the male and female pin headers.
+- Required enclosure fasteners: **6 × M2 × 10 mm screws** and **4 × M3 × 4 mm screws**. Screw prices are not included in the component budget.
 - Switch alternatives may differ in footprint and contact arrangement. Confirm fit and identify the common/switched contacts before wiring.
 - Check the battery's permitted charge current against the charger configuration; do not assume a module's default setting is suitable for a small 200 mAh cell. Set the boost output to **5.0 V before connecting the ESP32**.
 - Also allow for the 1 kΩ sensor resistor, wire, solder, fasteners and printed enclosure. These were not priced in the supplied shopping list.
@@ -144,6 +146,8 @@ Prices recorded on **14 September 2026**. Polish prices come from the linked lis
 **Poland is a subtotal excluding the assembly board; AliExpress is an indicative total for all 11 listed rows, not a verified checkout total.** Missing prices are not zero. The two shopping lists are independent: do not add their amounts together. Full packs are counted where specified, rather than just the individual parts consumed in one build.
 
 Conversion: **1 USD = 3.7267 PLN**, [NBP table 177/A/NBP/2026, 11 September 2026](https://api.nbp.pl/api/exchangerates/rates/a/usd/2026-09-11/?format=json). USD amounts are calculated from PLN and rounded independently to two decimal places; displayed row values may differ from the subtotal by a cent. Card/payment-provider exchange rates may differ.
+
+The amounts above include both optional pin-header rows. If you use the display's supplied wires instead, omit those purchases. The required **6 × M2 × 10 mm** and **4 × M3 × 4 mm screws** are not priced and must be budgeted separately.
 
 Shipping (including the AliExpress board's displayed 6.60 zł delivery), additional checkout charges, tools, enclosure printing and unlisted assembly supplies are excluded. AliExpress screenshot prices include displayed VAT for the selected destination; the ESP32's displayed special-offer price is used, but no additional coupons or extra discounts are applied.
 
