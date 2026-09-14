@@ -1,4 +1,4 @@
-import { explosionOffset } from './explosion-layout.mjs';
+import { explosionOffset } from './explosion-layout.mjs?v=20260914-26parts';
 const status=document.querySelector('#model-status'),load=document.querySelector('#load-model');
 let dispose=()=>{};
 load.addEventListener('click',async()=>{
@@ -17,7 +17,7 @@ load.addEventListener('click',async()=>{
   controls=new OrbitControls(camera,renderer.domElement);controls.listenToKeyEvents(renderer.domElement);
   const render=()=>renderer.render(scene,camera);controls.addEventListener('change',render);
   status.textContent='Downloading LauncherV2.glb…';
-  const response=await fetch('./models/LauncherV2.glb',{signal:AbortSignal.timeout(90000)});
+  const response=await fetch('./models/LauncherV2.glb?v=20260914-26parts',{signal:AbortSignal.timeout(90000)});
   if(!response.ok)throw new Error(`Model download failed (HTTP ${response.status}).`);
   const bytes=await response.arrayBuffer();status.textContent='Preparing model geometry…';
   const gltf=await new GLTFLoader().parseAsync(bytes,new URL('./models/',location.href).href);
