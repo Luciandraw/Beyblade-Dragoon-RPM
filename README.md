@@ -25,7 +25,7 @@ Prices below use Polish suppliers only. No Polish source was supplied for the as
 | Assembly board | 1 board, 60 × 80 mm | Source needed | — |
 | Central button, 6 × 6 × 13 mm | Pack of 5; one used | [Botland][pl-central] | 0.99 |
 | BeySense blade-present button | Pack of 10; one used | [Allegro][pl-beysense] | 5.37 |
-| SS22T35 power slide switch | Pack of 5; one used | [Botland][pl-switch] (out of stock when checked) | 5.90 |
+| SS22T35 power slide switch | Pack of 5; one used | [Botland][pl-switch] | 5.90 |
 | Female header, 2.54 mm | 1 strip, 40 pins | [Allegro][pl-female] | 3.35 |
 | Male header, 2.54 mm | 1 strip, 40 pins | [Allegro][pl-male] | 4.40 |
 | LiPo battery, 602020, 3.7 V, 200 mAh | 1 battery | [Allegro][pl-battery] | 22.90 |
