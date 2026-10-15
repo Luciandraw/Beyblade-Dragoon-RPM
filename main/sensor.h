@@ -4,6 +4,8 @@
 #include <esp_adc/adc_continuous.h>
 #include <soc/soc_caps.h>
 
+#include "launch_record.h"
+
 struct SensorReading {
   uint16_t raw = 0;
   uint16_t filtered = 0;
@@ -22,6 +24,13 @@ class Sensor {
   bool calibrationFinished() const;
   bool finishCalibration();
   bool calibrated() const { return calibrated_; }
+  void applyCalibration(const SensorCalibration& calibration);
+  SensorCalibration calibration() const {
+    return {minimum_, maximum_, thresholdLow_, thresholdHigh_};
+  }
+  // Power saving: the ADC stream runs only while a launch can be measured.
+  void setActive(bool active);
+  bool active() const { return active_; }
   uint16_t minimum() const { return minimum_; }
   uint16_t maximum() const { return maximum_; }
   uint16_t range() const { return maximum_ - minimum_; }
@@ -76,5 +85,6 @@ class Sensor {
   bool comparatorHigh_ = false;
   bool comparatorInitialized_ = false;
   bool calibrating_ = false;
+  bool active_ = true;
   bool calibrated_ = false;
 };

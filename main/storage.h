@@ -18,6 +18,8 @@ class Storage {
   uint32_t nextLaunchIndex() const { return data_.launchCounter + 1; }
   uint32_t bestRpm() const { return data_.bestRpm; }
   bool clear();
+  bool saveCalibration(const SensorCalibration& calibration);
+  bool loadCalibration(SensorCalibration& calibration);
   bool healthy() const { return healthy_; }
 
  private:
@@ -33,6 +35,11 @@ class Storage {
     LaunchRecord records[Config::HISTORY_SIZE];
   };
   bool save();
+  static constexpr uint32_t CALIBRATION_MAGIC = 0x43414C31;  // "CAL1"
+  struct PersistedCalibration {
+    uint32_t magic;
+    SensorCalibration values;
+  };
 
   mutable Preferences preferences_;
   PersistedData data_{};

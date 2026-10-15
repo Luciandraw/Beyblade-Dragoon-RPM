@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark"><meta name="theme-color" content="#e8e9e2"><script>try{const t=localStorage.getItem("beyblade-theme");if(t==="dark"||t==="light")document.documentElement.dataset.theme=t}catch{}</script>
+  <meta name="description" content="Preview the analyzer's e-paper screens and try the controls in your browser.">
+  <title>Beyblade RPM — Screen emulator</title>
+  <link rel="icon" href="./favicon.svg"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;600&family=Press+Start+2P&display=swap"><link rel="stylesheet" href="./style.css?v=20261015"><link rel="stylesheet" href="./screens.css?v=20261015">
+  <script type="module" src="./screen-emulator.js?v=20261015"></script>
+<link rel="stylesheet" href="./language.css?v=20261015">
+<script type="module" src="./language.js?v=20261015"></script>
+<script type="module" src="./theme.js?v=20261015"></script>
+</head>
+<body><main>
+  <header><a href="./" class="brand"><span class="brand-mark" aria-hidden="true">R</span><span>BEYBLADE <b>RPM</b></span></a><nav class="site-nav" aria-label="Main navigation"><a href="./model.html">3D assembly</a><a href="./wiring.html">Wiring diagram</a><a href="./screens.html" aria-current="page">Screens</a><a href="./#installer">Firmware</a></nav></header>
+  <div class="page-heading"><p class="eyebrow">FIRMWARE / E-PAPER 200 × 200</p><h1>Screen <em>emulator.</em></h1><p>The same layouts the analyzer draws, pixel for pixel. Use the buttons like the real device.</p></div>
+  <div class="emulator">
+    <section class="device" aria-label="Emulated analyzer">
+      <div class="bezel">
+        <div class="panel"><canvas id="epd" width="200" height="200" role="img" aria-label="E-paper display"></canvas></div>
+        <p class="bezel-label">WEACT 1.54″ · SSD1681</p>
+      </div>
+      <div class="device-buttons">
+        <button type="button" id="center" class="center-button" aria-describedby="center-hint">Center</button>
+        <p id="center-hint">Click · double-click · hold 0.9 s · hold 3 s</p>
+      </div>
+    </section>
+    <section class="controls" aria-labelledby="controls-title">
+      <p class="eyebrow">CONTROLS</p><h2 id="controls-title">Try it.</h2>
+      <div class="control-grid">
+        <button type="button" data-action="click">Click</button>
+        <button type="button" data-action="double">Double-click</button>
+        <button type="button" data-action="long">Hold 0.9 s</button>
+        <button type="button" data-action="service">Hold 3 s</button>
+      </div>
+      <div class="control-row">
+        <button type="button" id="blade" aria-pressed="false">Insert blade</button>
+        <button type="button" id="sleep">Sleep now</button>
+      </div>
+      <label class="rpm-control" for="launch-rpm">Launch peak <output id="launch-rpm-value">9200</output> RPM</label>
+      <input id="launch-rpm" type="range" min="2000" max="16000" step="100" value="9200">
+      <button type="button" id="launch" class="launch-button">Pull the launcher</button>
+      <p id="emulator-status" class="emulator-status" role="status" aria-live="polite">Booting…</p>
+      <p class="emulator-note">Screen layouts mirror main/display.cpp. Sensor timing and launch data are simulated.</p>
+    </section>
+  </div>
+  <section class="gallery-section" aria-labelledby="gallery-title"><p class="eyebrow">ALL SCREENS</p><h2 id="gallery-title">Every screen at a glance.</h2><div id="gallery" class="gallery"></div></section>
+  <footer><span>BEYBLADE RPM / Screen emulator</span><a href="./">Firmware installer →</a></footer>
+</main></body></html>

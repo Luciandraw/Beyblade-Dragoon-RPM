@@ -1,13 +1,19 @@
 #pragma once
 
 #include <Arduino.h>
+#include <functional>
 
 #include "launch_record.h"
 
+// Screens are drawn by a FreeRTOS task on core 0, so an e-paper refresh never
+// stalls loop() and the ADC stream. Each show*() call only queues the screen;
+// a newer request replaces one that has not started drawing yet.
 class Display {
  public:
   bool begin();
+  // Waits for queued drawing, then puts the panel into deep sleep.
   void hibernate();
+  void waitIdle();
   bool available() const { return available_; }
   void showBoot();
   void showCalibrating(uint16_t minimum, uint16_t maximum);
@@ -25,11 +31,12 @@ class Display {
   void showGraph(const RpmSample* samples, uint16_t count, uint32_t peakRpm);
 
  private:
-  void startFrame(bool partial = false);
-  void finishFrame();
-  void title(const char* text);
-  void centered(const char* text, int16_t y, uint8_t size);
+  void post(std::function<void()> job);
+  static void renderTask(void* self);
+
   bool available_ = false;
-  bool partial_ = false;
-  uint8_t partialCount_ = 0;
+  SemaphoreHandle_t lock_ = nullptr;
+  TaskHandle_t task_ = nullptr;
+  std::function<void()> pending_;
+  bool drawing_ = false;
 };

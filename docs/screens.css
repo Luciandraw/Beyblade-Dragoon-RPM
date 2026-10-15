@@ -1,0 +1,37 @@
+.emulator{display:grid;grid-template-columns:minmax(0,auto) minmax(0,1fr);gap:40px;align-items:start;margin-bottom:56px}
+/* Device: a launcher-coloured shell around the e-paper panel. */
+.bezel{padding:22px 22px 14px;background:var(--scr-bg);border-radius:14px 14px 36px 14px;box-shadow:inset 0 0 0 3px var(--scr-bg),inset 0 0 0 5px var(--scr-line),8px 8px 0 var(--gb1)}
+.panel{padding:10px;background:#c9cbc1;border-radius:4px;box-shadow:inset 3px 3px 0 #9a9c92}
+#epd{display:block;width:min(400px,calc(100vw - 108px));aspect-ratio:1;image-rendering:pixelated;background:#e3e4dc}
+.bezel-label{margin:12px 0 0;color:#b9bbb1;font:var(--fs-label) var(--pixel);text-align:center;letter-spacing:.06em}
+.device-buttons{display:flex;align-items:center;gap:16px;margin-top:22px}
+.center-button{width:68px;height:68px;padding:0;border-radius:50%;font-size:.5rem;flex-shrink:0}
+.device-buttons p{margin:0;color:var(--muted);font-size:var(--fs-small)}
+.controls{padding:28px;background:var(--hi);border:3px solid var(--ink);border-radius:6px;box-shadow:inset 0 0 0 3px var(--hi),inset 0 0 0 5px var(--ink),6px 6px 0 var(--gb1)}
+.controls h2{margin-bottom:20px}
+.control-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.control-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+.controls button{padding:12px 10px;font-size:var(--fs-label)}
+.control-grid button,.control-row button{background:var(--hi);color:var(--ink)}
+#blade[aria-pressed=true]{background:var(--ink);color:var(--hi)}
+.rpm-control{display:flex;gap:8px;align-items:baseline;margin:24px 0 6px;font:var(--fs-label)/2 var(--pixel)}
+.rpm-control output{margin-left:auto}
+#launch-rpm{appearance:none;width:100%;height:28px;background:transparent;cursor:pointer}
+#launch-rpm::-webkit-slider-runnable-track{height:12px;border:3px solid var(--ink);background:var(--checker),var(--hi)}
+#launch-rpm::-moz-range-track{height:6px;border:3px solid var(--ink);background:var(--hi)}
+#launch-rpm::-webkit-slider-thumb{appearance:none;width:18px;height:26px;margin-top:-10px;background:var(--ink);border:3px solid var(--hi);box-shadow:0 0 0 3px var(--ink)}
+#launch-rpm::-moz-range-thumb{width:14px;height:22px;border-radius:0;background:var(--ink);border:3px solid var(--hi)}
+.launch-button{margin-top:14px}
+.emulator-status{margin:20px 0 0;padding:12px 14px;border:3px solid var(--ink);border-radius:4px;font-size:var(--fs-body)}
+.emulator-note{margin:14px 0 0;color:var(--muted);font-size:var(--fs-small)}
+.gallery-section{border-top:4px solid var(--ink);padding:32px 0}
+.gallery-section h2{margin-bottom:22px}
+.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(212px,1fr));gap:18px}
+.gallery figure{margin:0;padding:6px;background:#c9cbc1;border:3px solid var(--ink);border-radius:4px;box-shadow:4px 4px 0 var(--gb1)}
+.gallery canvas{display:block;width:100%;aspect-ratio:1;image-rendering:pixelated;background:#e3e4dc}
+.gallery figcaption{padding:8px 2px 2px;color:#23241f;font:var(--fs-label)/1.6 var(--pixel)}
+/* E-paper full refresh: the panel flashes inverted before settling. */
+.panel.refresh #epd{animation:epd-flash .6s steps(1) 1}
+@keyframes epd-flash{0%{filter:invert(1)}33%{filter:none}66%{filter:invert(1)}100%{filter:none}}
+@media(max-width:900px){.emulator{grid-template-columns:1fr}.device{justify-self:center}}
+@media(prefers-reduced-motion:reduce){.panel.refresh #epd{animation:none}}
