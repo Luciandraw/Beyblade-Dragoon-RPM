@@ -2,11 +2,13 @@
 
 An ESP32-S3-Zero launch-speed analyzer with an analog QRE1113 optical sensor and a 200 × 200 e-paper display. The sensor reads a half-white, half-black disk (one period per revolution). The firmware detects launches automatically, calculates average and peak RPM, and stores the last 20 results.
 
-[Project website](https://luciandraw.github.io/Beyblade-Dragoon-RPM/) · [3D assembly](https://luciandraw.github.io/Beyblade-Dragoon-RPM/model.html) · [Wiring diagram](https://luciandraw.github.io/Beyblade-Dragoon-RPM/wiring.html)
+[Project website](https://luciandraw.github.io/Beyblade-Dragoon-RPM/) · [3D assembly](https://luciandraw.github.io/Beyblade-Dragoon-RPM/model.html) · [Wiring diagram](https://luciandraw.github.io/Beyblade-Dragoon-RPM/wiring.html) · [Screen emulator](https://luciandraw.github.io/Beyblade-Dragoon-RPM/screens.html)
 
 ## Website and firmware
 
-The English website includes an interactive wiring diagram, a 3D viewer with exploded assembly and clean wireframe modes, and a browser-based USB installer.
+The website (English and Polish, light and dark themes) includes an interactive wiring diagram, a 3D viewer with exploded assembly and wireframe modes, a screen emulator, and a browser-based USB installer.
+
+The screen emulator ([docs/screens.html](docs/screens.html)) redraws every e-paper screen pixel for pixel: [docs/screens.mjs](docs/screens.mjs) mirrors [main/display.cpp](main/display.cpp) using the same Adafruit GFX font and primitives. When changing a layout, update both files. After changing a bitmap header, regenerate the assets with `python scripts/export-screen-assets.py <Adafruit_GFX_Library>/glcdfont.c`.
 
 ## Components and purchase links
 
@@ -86,11 +88,17 @@ The project also includes a PlatformIO configuration: `platformio.ini` sets `src
 
 ## Operation
 
-Startup uses thresholds measured on the assembled device and stored in `config.h`; a separate calibration step is no longer required. Manual calibration remains available if sensor position or lighting changes. In `SENSOR ALIGN`, adjust the gap to approximately 0.5–1.5 mm and shield the sensor from ambient light.
+Startup uses thresholds measured on the assembled device and stored in `config.h`; a separate calibration step is no longer required. Manual calibration remains available if sensor position or lighting changes. A successful manual calibration is saved to NVS and restored after sleep and reboot; clearing the launch history keeps it. In `SENSOR ALIGN`, adjust the gap to approximately 0.5–1.5 mm and shield the sensor from ambient light.
 
 The device initially shows `INSERT BLADE`. The blade-present button on GPIO10 must connect to GND when a blade is installed; the display then shows `READY`. The armed state is latched, so releasing the button during launch does not cancel measurement.
 
-A launch starts after three same-direction QRE1113 transitions within 200 ms. Measurement ends after 250 ms without transitions. This limits very slow rotation measurements regardless of the filter's 10 RPM lower bound. The display and NVS are not updated during measurement. Wait for the READY refresh to finish before pulling: synchronous e-paper refresh blocks ADC processing for approximately 1.5 seconds.
+A launch starts after three same-direction QRE1113 transitions within 200 ms. Measurement ends after 250 ms without transitions. This limits very slow rotation measurements regardless of the filter's 10 RPM lower bound. The display and NVS are not updated during measurement. The e-paper is drawn by a separate FreeRTOS task on core 0, so a refresh no longer blocks ADC processing; a newer screen replaces one that has not started drawing yet.
+
+### Power and sleep
+
+- The ADC stream and full 240 MHz CPU speed run only while a launch can be measured (READY with a blade, measuring), during calibration, and on the service screen. Otherwise the ADC is stopped and the CPU runs at 80 MHz.
+- After 60 seconds without activity the device shows the logo and enters deep sleep. It wakes on the center button or, if no blade was seated, on inserting a blade (GPIO10, ext1 wake); a blade wake goes straight to the armed READY screen.
+- Battery voltage cannot be measured without additional wiring.
 
 ### Central button
 

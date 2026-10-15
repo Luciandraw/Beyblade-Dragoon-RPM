@@ -3,362 +3,429 @@
 #include <GxEPD2_BW.h>
 #include <math.h>
 #include <SPI.h>
+#include <vector>
 
 #include "config.h"
 #include "blade_icon.h"
 #include "logo_bitmap.h"
+
+// Game Boy styling for a 1-bit panel, matching the project website:
+// dotted ground, black header/footer bars, Pokemon-style double-framed boxes
+// and a triangle cursor. Only Adafruit GFX built-ins (5x7 font, rects, round
+// rects, circles, bitmaps) are used so docs/screens.html can mirror every
+// screen pixel for pixel. Keep that emulator in step when changing layouts.
 
 using Panel = GxEPD2_154_D67;
 static GxEPD2_BW<Panel, Panel::HEIGHT> epd(
     Panel(Config::PIN_EPD_CS, Config::PIN_EPD_DC,
           Config::PIN_EPD_RST, Config::PIN_EPD_BUSY));
 
-bool Display::begin() {
-  SPI.begin(Config::PIN_EPD_SCK, -1, Config::PIN_EPD_MOSI, Config::PIN_EPD_CS);
-  // WeAct's official ESP32-C3 example uses a 50 ms reset pulse.
-  // Shorter pulses leave some SSD1681 revisions unresponsive.
-  epd.init(Config::SERIAL_BAUD, true, 50, false);
-  epd.setRotation(0);
-  epd.setTextColor(GxEPD_BLACK);
-  available_ = true;
-  return true;
-}
+namespace {
+constexpr uint16_t BLACK = GxEPD_BLACK;
+constexpr uint16_t WHITE = GxEPD_WHITE;
+uint8_t partialCount = 0;
 
-void Display::hibernate() {
-  epd.hibernate();
-}
-
-void Display::startFrame(bool partial) {
-  partial_ = partial && partialCount_ < Config::FULL_REFRESH_AFTER_PARTIAL;
-  if (partial_) {
+void startFrame(bool partial = false) {
+  if (partial && partialCount < Config::FULL_REFRESH_AFTER_PARTIAL) {
     epd.setPartialWindow(0, 0, epd.width(), epd.height());
-    ++partialCount_;
+    ++partialCount;
   } else {
     epd.setFullWindow();
-    partialCount_ = 0;
+    partialCount = 0;
   }
   epd.firstPage();
 }
 
-void Display::finishFrame() {
-  while (epd.nextPage()) {}
+int16_t textWidth(const char* text, uint8_t size) {
+  return static_cast<int16_t>(strlen(text)) * 6 * size;
 }
 
-void Display::title(const char* text) {
-  epd.setTextSize(1);
-  epd.setCursor(8, 15);
-  epd.print(text);
-  epd.drawLine(5, 21, 194, 21, GxEPD_BLACK);
-}
-
-void Display::centered(const char* text, int16_t y, uint8_t size) {
+void text(const char* value, int16_t x, int16_t y, uint8_t size = 1,
+          uint16_t color = BLACK) {
   epd.setTextSize(size);
-  int16_t x1, y1;
-  uint16_t w, h;
-  epd.getTextBounds(text, 0, y, &x1, &y1, &w, &h);
-  epd.setCursor((200 - static_cast<int16_t>(w)) / 2, y);
-  epd.print(text);
+  epd.setTextColor(color);
+  epd.setCursor(x, y);
+  epd.print(value);
 }
 
-void Display::showBoot() {
+void centered(const char* value, int16_t y, uint8_t size = 1,
+              uint16_t color = BLACK) {
+  text(value, (200 - textWidth(value, size)) / 2, y, size, color);
+}
+
+void rightAligned(const char* value, int16_t right, int16_t y, uint8_t size = 1,
+                  uint16_t color = BLACK) {
+  text(value, right - textWidth(value, size), y, size, color);
+}
+
+// Sparse two-dot pattern, like the ground tiles on the website.
+void ground() {
+  epd.fillScreen(WHITE);
+  for (int16_t y = 0; y < 200; ++y) {
+    for (int16_t x = 0; x < 200; ++x) {
+      if ((x % 8 == 1 && y % 8 == 2) || (x % 8 == 5 && y % 8 == 6)) {
+        epd.drawPixel(x, y, BLACK);
+      }
+    }
+  }
+}
+
+// Pokemon text box: thick rounded outline with a thin inner rule.
+void frame(int16_t x, int16_t y, int16_t w, int16_t h) {
+  epd.fillRoundRect(x, y, w, h, 4, BLACK);
+  epd.fillRoundRect(x + 2, y + 2, w - 4, h - 4, 3, WHITE);
+  epd.drawRoundRect(x + 4, y + 4, w - 8, h - 8, 2, BLACK);
+}
+
+// Right-pointing cursor, 7 px tall per size step.
+void cursor(int16_t x, int16_t y, uint8_t size = 1, uint16_t color = BLACK) {
+  for (int16_t i = 0; i < 4 * size; ++i) {
+    epd.drawFastVLine(x + i, y + i, 8 * size - 1 - 2 * i, color);
+  }
+}
+
+// "More text" prompt in the corner of a dialog box.
+void prompt(int16_t x, int16_t y) {
+  for (int16_t i = 0; i < 4; ++i) epd.drawFastHLine(x + i, y + i, 7 - 2 * i, BLACK);
+}
+
+void header(const char* title, const char* right = nullptr) {
+  epd.fillRect(0, 0, 200, 20, BLACK);
+  epd.fillRect(4, 3, 14, 14, WHITE);
+  text("R", 8, 6, 1, BLACK);
+  text(title, 24, 6, 1, WHITE);
+  if (right) rightAligned(right, 195, 6, 1, WHITE);
+}
+
+void footer(const char* left, const char* right = nullptr) {
+  epd.fillRect(0, 184, 200, 16, BLACK);
+  text(left, 6, 188, 1, WHITE);
+  if (right) rightAligned(right, 195, 188, 1, WHITE);
+}
+
+void statsFooter(uint32_t bestRpm, uint32_t launchCount) {
+  char best[20], next[12];
+  snprintf(best, sizeof(best), "BEST %lu", static_cast<unsigned long>(bestRpm));
+  snprintf(next, sizeof(next), "#%03lu", static_cast<unsigned long>(launchCount + 1));
+  footer(best, next);
+}
+
+void drawBoot() {
   startFrame();
   do {
-    epd.fillScreen(GxEPD_WHITE);
-    epd.drawBitmap(0, 0, BOOT_LOGO_BITMAP, BOOT_LOGO_WIDTH,
-                   BOOT_LOGO_HEIGHT, GxEPD_BLACK);
+    epd.fillScreen(WHITE);
+    epd.drawBitmap(0, 0, BOOT_LOGO_BITMAP, BOOT_LOGO_WIDTH, BOOT_LOGO_HEIGHT, BLACK);
   } while (epd.nextPage());
 }
 
-void Display::showCalibrating(uint16_t minimum, uint16_t maximum) {
+void drawCalibrating(uint16_t minimum, uint16_t maximum) {
+  char line[24];
   startFrame(true);
   do {
-    epd.fillScreen(GxEPD_WHITE);
-    epd.drawRect(3, 3, 194, 194, GxEPD_BLACK);
-    title("SENSOR CALIBRATION");
-    centered("PULL LAUNCHER", 70, 2);
-    centered("SMOOTHLY", 98, 2);
-    epd.setTextSize(1);
-    epd.setCursor(25, 145); epd.printf("MIN %u  MAX %u", minimum, maximum);
+    ground();
+    header("CALIBRATION");
+    frame(4, 26, 192, 98);
+    centered("PULL", 42, 3);
+    centered("SMOOTHLY", 74, 2);
+    centered("FOR 3 SECONDS", 100, 1);
+    frame(4, 128, 192, 52);
+    snprintf(line, sizeof(line), "MIN %u", minimum);
+    text(line, 16, 142);
+    snprintf(line, sizeof(line), "MAX %u", maximum);
+    text(line, 16, 158);
+    prompt(178, 164);
+    footer("SENSOR SETUP");
   } while (epd.nextPage());
 }
 
-void Display::showInsertBlade(uint32_t bestRpm, uint32_t launchCount) {
+void drawInsertBlade(uint32_t bestRpm, uint32_t launchCount) {
   startFrame();
   do {
-    epd.fillScreen(GxEPD_WHITE);
-    epd.drawRect(3, 3, 194, 194, GxEPD_BLACK);
-    title("BEY ANALYZER");
-    centered("INSERT", 72, 3);
-    centered("BLADE", 106, 3);
-    epd.setTextSize(1); epd.setCursor(16, 177);
-    epd.printf("BEST %lu  #%lu", static_cast<unsigned long>(bestRpm),
-               static_cast<unsigned long>(launchCount + 1));
+    ground();
+    header("BEYBLADE RPM");
+    frame(60, 28, 80, 80);
+    epd.drawBitmap(81, 49, BLADE_ICON_BITMAP, BLADE_ICON_WIDTH, BLADE_ICON_HEIGHT, BLACK);
+    frame(4, 114, 192, 66);
+    text("INSERT", 16, 128, 2);
+    text("BLADE", 16, 148, 2);
+    text("TO ARM", 112, 134);
+    text("LAUNCHER", 112, 148);
+    prompt(178, 164);
+    statsFooter(bestRpm, launchCount);
   } while (epd.nextPage());
 }
 
-void Display::showReady(uint32_t bestRpm, uint32_t launchCount) {
+void drawReady(uint32_t bestRpm, uint32_t launchCount) {
   startFrame();
   do {
-    epd.fillScreen(GxEPD_WHITE);
-    epd.drawRect(3, 3, 194, 194, GxEPD_BLACK);
-    title("BEY ANALYZER");
-    epd.drawBitmap(155, 28, BLADE_ICON_BITMAP, BLADE_ICON_WIDTH,
-                   BLADE_ICON_HEIGHT, GxEPD_BLACK);
-    centered("READY", 78, 3);
-    centered("PULL TO START", 122, 1);
-    epd.setTextSize(1); epd.setCursor(16, 177);
-    epd.printf("BEST %lu  #%lu", static_cast<unsigned long>(bestRpm),
-               static_cast<unsigned long>(launchCount + 1));
+    ground();
+    header("BEYBLADE RPM", "ARMED");
+    frame(4, 26, 192, 84);
+    epd.drawBitmap(16, 49, BLADE_ICON_BITMAP, BLADE_ICON_WIDTH, BLADE_ICON_HEIGHT, BLACK);
+    text("READY", 64, 52, 4);
+    frame(4, 114, 192, 66);
+    cursor(14, 130, 1);
+    text("PULL THE", 26, 130, 1);
+    text("STRING!", 26, 146, 2);
+    prompt(178, 164);
+    statsFooter(bestRpm, launchCount);
   } while (epd.nextPage());
 }
 
-void Display::showResult(const LaunchRecord& record, uint32_t bestRpm,
-                         bool newBest) {
-  char rpm[12];
+void drawResult(const LaunchRecord& record, uint32_t bestRpm, bool newBest) {
+  char rpm[12], line[24], title[16];
   snprintf(rpm, sizeof(rpm), "%lu", static_cast<unsigned long>(record.peakRpm));
+  snprintf(title, sizeof(title), "LAUNCH %03lu", static_cast<unsigned long>(record.timestamp));
   startFrame();
   do {
-    epd.fillScreen(GxEPD_WHITE);
-    epd.drawRect(3, 3, 194, 194, GxEPD_BLACK);
+    ground();
+    header(title, newBest ? "NEW BEST!" : "RESULT");
+    frame(4, 24, 192, 112);
 
-    // Inverted status header.
-    epd.fillRect(4, 4, 192, 20, GxEPD_BLACK);
-    epd.setTextColor(GxEPD_WHITE);
-    epd.setTextSize(1);
-    epd.setCursor(9, 17);
-    epd.printf("LAUNCH %03lu", static_cast<unsigned long>(record.timestamp));
-    epd.setCursor(newBest ? 143 : 158, 17);
-    epd.print(newBest ? "NEW BEST" : "RESULT");
-    epd.setTextColor(GxEPD_BLACK);
-
-    // Retro tachometer arc from 0 to 15K RPM.
+    // Tachometer arc from 0 to 15K RPM.
     constexpr int16_t gaugeX = 100;
     constexpr int16_t gaugeY = 126;
-    constexpr int16_t gaugeRadius = 68;
+    constexpr int16_t gaugeRadius = 78;
     constexpr uint32_t gaugeMaxRpm = 15000;
     int16_t previousX = gaugeX - gaugeRadius;
     int16_t previousY = gaugeY;
-    for (int16_t degrees = 185; degrees <= 355; degrees += 5) {
+    for (int16_t degrees = 185; degrees <= 360; degrees += 5) {
       const float radians = degrees * PI / 180.0f;
-      const int16_t x = gaugeX + cosf(radians) * gaugeRadius;
-      const int16_t y = gaugeY + sinf(radians) * gaugeRadius;
-      epd.drawLine(previousX, previousY, x, y, GxEPD_BLACK);
+      const int16_t x = gaugeX + lroundf(cosf(radians) * gaugeRadius);
+      const int16_t y = gaugeY + lroundf(sinf(radians) * gaugeRadius);
+      epd.drawLine(previousX, previousY, x, y, BLACK);
       previousX = x;
       previousY = y;
     }
-    epd.drawLine(previousX, previousY, gaugeX + gaugeRadius, gaugeY,
-                 GxEPD_BLACK);
     for (uint8_t tick = 0; tick <= 10; ++tick) {
       const float radians = (180.0f + tick * 18.0f) * PI / 180.0f;
-      const int16_t innerRadius = tick % 5 == 0 ? 57 : 62;
-      epd.drawLine(gaugeX + cosf(radians) * innerRadius,
-                   gaugeY + sinf(radians) * innerRadius,
-                   gaugeX + cosf(radians) * gaugeRadius,
-                   gaugeY + sinf(radians) * gaugeRadius, GxEPD_BLACK);
+      const int16_t inner = tick % 5 == 0 ? 66 : 71;
+      epd.drawLine(gaugeX + lroundf(cosf(radians) * inner),
+                   gaugeY + lroundf(sinf(radians) * inner),
+                   gaugeX + lroundf(cosf(radians) * gaugeRadius),
+                   gaugeY + lroundf(sinf(radians) * gaugeRadius), BLACK);
     }
-
     const uint32_t gaugeRpm = min<uint32_t>(record.peakRpm, gaugeMaxRpm);
-    const float markerRadians =
-        (180.0f + 180.0f * gaugeRpm / gaugeMaxRpm) * PI / 180.0f;
-    const int16_t markerX = gaugeX + cosf(markerRadians) * 63;
-    const int16_t markerY = gaugeY + sinf(markerRadians) * 63;
-    epd.fillCircle(markerX, markerY, 3, GxEPD_BLACK);
+    const float marker = (180.0f + 180.0f * gaugeRpm / gaugeMaxRpm) * PI / 180.0f;
+    epd.fillCircle(gaugeX + lroundf(cosf(marker) * 72),
+                   gaugeY + lroundf(sinf(marker) * 72), 3, BLACK);
+    centered(rpm, 80, 4);
+    centered("RPM", 112, 1);
+    text("0", 26, 118);
+    text("15K", 156, 118);
 
-    centered(rpm, 73, 4);
-    centered("RPM", 109, 1);
-    epd.setTextSize(1);
-    epd.setCursor(25, 132); epd.print("0");
-    epd.setCursor(157, 132); epd.print("15K");
+    // HP-style power bar, saturated at the gauge maximum.
+    frame(4, 138, 192, 46);
+    text("PWR", 12, 150);
+    epd.drawRoundRect(34, 149, 154, 9, 3, BLACK);
+    const int16_t fill = static_cast<int16_t>(150UL * gaugeRpm / gaugeMaxRpm);
+    if (fill > 0) epd.fillRect(36, 151, fill, 5, BLACK);
+    snprintf(line, sizeof(line), "AVG %lu", static_cast<unsigned long>(record.averageRpm));
+    text(line, 12, 166);
+    snprintf(line, sizeof(line), "%lums", static_cast<unsigned long>(record.durationMs));
+    rightAligned(line, 188, 166);
+    snprintf(line, sizeof(line), "BEST %lu", static_cast<unsigned long>(bestRpm));
+    footer(line, "CLICK: OK");
+  } while (epd.nextPage());
+}
 
-    // Ten-segment launch power bar, saturated at the gauge maximum.
-    constexpr int16_t barLeft = 15;
-    constexpr int16_t barTop = 143;
-    constexpr int16_t segmentStep = 17;
-    const uint8_t filledSegments = min<uint32_t>(
-        10, (gaugeRpm * 10 + gaugeMaxRpm - 1) / gaugeMaxRpm);
-    for (uint8_t segment = 0; segment < 10; ++segment) {
-      const int16_t x = barLeft + segment * segmentStep;
-      epd.drawRect(x, barTop, 14, 13, GxEPD_BLACK);
-      if (segment < filledSegments) {
-        epd.fillRect(x + 2, barTop + 2, 10, 9, GxEPD_BLACK);
+void drawInvalidLaunch() {
+  startFrame();
+  do {
+    ground();
+    header("LAUNCH");
+    frame(4, 40, 192, 100);
+    centered("NO VALID", 62, 2);
+    centered("DATA", 84, 2);
+    centered("TRY AGAIN", 114, 1);
+    footer("REJECTED");
+  } while (epd.nextPage());
+}
+
+void drawSensorError(uint16_t minimum, uint16_t maximum) {
+  char line[24];
+  startFrame();
+  do {
+    ground();
+    header("SENSOR", "ERROR");
+    frame(4, 26, 192, 98);
+    centered("RANGE", 42, 2);
+    centered("TOO LOW", 62, 2);
+    snprintf(line, sizeof(line), "MIN %u  MAX %u", minimum, maximum);
+    centered(line, 88);
+    centered("CHECK DISC + SENSOR", 104);
+    frame(4, 128, 192, 52);
+    cursor(14, 146, 1);
+    text("CLICK: RETRY", 26, 146);
+    footer("SENSOR ALIGN");
+  } while (epd.nextPage());
+}
+
+void drawHistory(bool hasRecord, const LaunchRecord& record, uint8_t position, uint8_t count) {
+  char line[24], page[12];
+  snprintf(page, sizeof(page), "%u/%u", hasRecord ? position + 1 : 0, count);
+  startFrame(true);
+  do {
+    ground();
+    header("HISTORY", page);
+    frame(4, 26, 192, 112);
+    if (!hasRecord) {
+      centered("NO LAUNCHES", 66, 2);
+      centered("YET", 88, 2);
+    } else {
+      snprintf(line, sizeof(line), "#%03lu", static_cast<unsigned long>(record.timestamp));
+      text(line, 16, 38, 2);
+      epd.drawBitmap(146, 36, BLADE_ICON_BITMAP, BLADE_ICON_WIDTH, BLADE_ICON_HEIGHT, BLACK);
+      snprintf(line, sizeof(line), "%lu", static_cast<unsigned long>(record.peakRpm));
+      text(line, 16, 74, 4);
+      text("RPM PEAK", 16, 112);
+    }
+    frame(4, 140, 192, 44);
+    if (hasRecord) {
+      snprintf(line, sizeof(line), "AVG %lu", static_cast<unsigned long>(record.averageRpm));
+      text(line, 14, 152);
+      snprintf(line, sizeof(line), "%lums", static_cast<unsigned long>(record.durationMs));
+      rightAligned(line, 186, 152);
+    }
+    text("CLICK NEXT", 14, 166);
+    rightAligned("HOLD BACK", 186, 166);
+    footer("LAUNCH LOG");
+  } while (epd.nextPage());
+}
+
+void drawMenu(uint8_t item) {
+  static const char* const items[] = {"HISTORY", "GRAPH", "CALIBRATE", "CLEAR LOG", "BACK"};
+  startFrame(true);
+  do {
+    ground();
+    header("MENU");
+    frame(4, 26, 192, 140);
+    for (uint8_t i = 0; i < 5; ++i) {
+      const int16_t y = 38 + i * 25;
+      if (i == item) cursor(16, y, 2);
+      text(items[i], 34, y, 2);
+    }
+    footer("2X SELECT", "HOLD BACK");
+  } while (epd.nextPage());
+}
+
+void drawClearConfirmation() {
+  startFrame(true);
+  do {
+    ground();
+    header("CLEAR LOG?");
+    frame(4, 26, 192, 92);
+    centered("ERASE ALL", 42, 2);
+    centered("LAUNCHES?", 62, 2);
+    centered("CANNOT BE UNDONE", 92);
+    frame(100, 120, 96, 62);
+    cursor(112, 134, 2);
+    text("YES", 130, 134, 2);
+    text("NO", 130, 156, 2);
+    frame(4, 120, 94, 62);
+    text("DOUBLE", 14, 134);
+    text("= YES", 14, 144);
+    text("CLICK", 14, 158);
+    text("= NO", 14, 168);
+    footer("HISTORY ONLY", "KEEPS CAL");
+  } while (epd.nextPage());
+}
+
+void drawService(uint16_t raw, uint16_t minimum, uint16_t maximum, uint16_t low,
+                 uint16_t high, uint32_t transitions, bool state) {
+  char line[32];
+  startFrame(true);
+  do {
+    ground();
+    header("SERVICE", state ? "HIGH" : "LOW");
+    frame(4, 26, 192, 134);
+    const char* labels[] = {"RAW", "MIN/MAX", "LOW/HIGH", "RANGE", "EDGES"};
+    for (uint8_t i = 0; i < 5; ++i) {
+      const int16_t y = 40 + i * 22;
+      text(labels[i], 14, y);
+      switch (i) {
+        case 0: snprintf(line, sizeof(line), "%u", raw); break;
+        case 1: snprintf(line, sizeof(line), "%u/%u", minimum, maximum); break;
+        case 2: snprintf(line, sizeof(line), "%u/%u", low, high); break;
+        case 3: snprintf(line, sizeof(line), "%u", maximum - minimum); break;
+        default: snprintf(line, sizeof(line), "%lu", static_cast<unsigned long>(transitions)); break;
+      }
+      rightAligned(line, 186, y);
+      if (i < 4) {
+        for (int16_t x = 14; x < 186; x += 3) epd.drawPixel(x, y + 13, BLACK);
       }
     }
-
-    epd.setCursor(9, 171);
-    epd.printf("AVG %lu", static_cast<unsigned long>(record.averageRpm));
-    epd.setCursor(116, 171);
-    epd.printf("%lums", static_cast<unsigned long>(record.durationMs));
-    epd.setCursor(9, 188);
-    epd.printf("BEST %lu", static_cast<unsigned long>(bestRpm));
+    frame(4, 162, 192, 22);
+    centered("CLICK REFRESH  HOLD EXIT", 169);
+    footer("SENSOR DIAGNOSTICS");
   } while (epd.nextPage());
 }
 
-void Display::showInvalidLaunch() {
+void drawGraph(const std::vector<RpmSample>& samples, uint32_t peakRpm) {
+  const uint16_t count = samples.size();
   startFrame();
   do {
-    epd.fillScreen(GxEPD_WHITE); epd.drawRect(3, 3, 194, 194, GxEPD_BLACK);
-    title("LAUNCH REJECTED"); centered("NO VALID DATA", 92, 2);
-    centered("TRY AGAIN", 128, 1);
-  } while (epd.nextPage());
-}
-
-void Display::showSensorError(uint16_t minimum, uint16_t maximum) {
-  startFrame();
-  do {
-    epd.fillScreen(GxEPD_WHITE); epd.drawRect(3, 3, 194, 194, GxEPD_BLACK);
-    title("SENSOR ALIGN"); centered("RANGE TOO LOW", 78, 2);
-    epd.setTextSize(1); epd.setCursor(31, 120);
-    epd.printf("MIN %u MAX %u", minimum, maximum);
-    centered("CENTER: RETRY", 162, 1);
-  } while (epd.nextPage());
-}
-
-void Display::showHistory(const LaunchRecord* record, uint8_t position, uint8_t count) {
-  startFrame(true);
-  do {
-    epd.fillScreen(GxEPD_WHITE); epd.drawRect(3, 3, 194, 194, GxEPD_BLACK);
-    title("LAUNCH HISTORY");
-    if (!record) {
-      centered("EMPTY", 98, 2);
-    } else {
-      epd.setTextSize(2); epd.setCursor(20, 65);
-      epd.printf("#%03lu", static_cast<unsigned long>(record->timestamp));
-      epd.setTextSize(3); epd.setCursor(20, 108);
-      epd.printf("%lu", static_cast<unsigned long>(record->peakRpm));
-      epd.setTextSize(1); epd.setCursor(20, 133); epd.print("RPM PEAK");
-      epd.setCursor(20, 158);
-      epd.printf("AVG %lu  %lums", static_cast<unsigned long>(record->averageRpm),
-                 static_cast<unsigned long>(record->durationMs));
-      epd.setCursor(75, 184); epd.printf("%u/%u", position + 1, count);
-    }
-  } while (epd.nextPage());
-}
-
-void Display::showMenu(uint8_t item) {
-  static const char* const items[] = {"HISTORY", "LAST GRAPH", "CALIBRATE", "CLEAR HISTORY", "BACK"};
-  startFrame(true);
-  do {
-    epd.fillScreen(GxEPD_WHITE); epd.drawRect(3, 3, 194, 194, GxEPD_BLACK);
-    title("MENU");
-    for (uint8_t i = 0; i < 5; ++i) {
-      const int16_t y = 50 + i * 29;
-      if (i == item) { epd.fillRect(10, y - 15, 180, 22, GxEPD_BLACK); epd.setTextColor(GxEPD_WHITE); }
-      epd.setTextSize(1); epd.setCursor(18, y); epd.print(items[i]);
-      epd.setTextColor(GxEPD_BLACK);
-    }
-    epd.setTextSize(1); epd.setCursor(32, 190);
-    epd.print("2X SELECT  HOLD BACK");
-  } while (epd.nextPage());
-}
-
-void Display::showClearConfirmation() {
-  startFrame(true);
-  do {
-    epd.fillScreen(GxEPD_WHITE); epd.drawRect(3, 3, 194, 194, GxEPD_BLACK);
-    title("CLEAR HISTORY?");
-    centered("DOUBLE: YES", 86, 2);
-    centered("CLICK: NO", 128, 1);
-    centered("CANNOT UNDO", 166, 1);
-  } while (epd.nextPage());
-}
-
-void Display::showService(uint16_t raw, uint16_t minimum, uint16_t maximum,
-                          uint16_t low, uint16_t high, uint32_t transitions,
-                          bool state) {
-  startFrame(true);
-  do {
-    epd.fillScreen(GxEPD_WHITE); epd.drawRect(3, 3, 194, 194, GxEPD_BLACK);
-    title("SERVICE"); epd.setTextSize(1);
-    epd.setCursor(15, 48); epd.printf("RAW       %u", raw);
-    epd.setCursor(15, 70); epd.printf("MIN/MAX   %u/%u", minimum, maximum);
-    epd.setCursor(15, 92); epd.printf("LOW/HIGH  %u/%u", low, high);
-    epd.setCursor(15, 114); epd.printf("RANGE     %u", maximum - minimum);
-    epd.setCursor(15, 136); epd.printf("EDGES     %lu", static_cast<unsigned long>(transitions));
-    epd.setCursor(15, 158); epd.printf("STATE     %s", state ? "HIGH" : "LOW");
-    epd.setCursor(15, 178); epd.print("CLICK: REFRESH");
-    epd.setCursor(15, 190); epd.print("HOLD: EXIT");
-  } while (epd.nextPage());
-}
-
-void Display::showGraph(const RpmSample* samples, uint16_t count, uint32_t peakRpm) {
-  startFrame();
-  do {
-    epd.fillScreen(GxEPD_WHITE); epd.drawRect(3, 3, 194, 194, GxEPD_BLACK);
-    title("LAUNCH PROFILE");
+    ground();
+    header("LAUNCH PROFILE");
+    frame(0, 22, 200, 160);
 
     const int16_t left = 27;
     const int16_t width = 163;
-    const int16_t lineTop = 29;
-    const int16_t lineHeight = 56;
-    const int16_t barsTop = 94;
-    const int16_t barsHeight = 67;
+    const int16_t lineTop = 32;
+    const int16_t lineHeight = 60;
+    const int16_t barsTop = 102;
+    const int16_t barsHeight = 70;
     const int16_t right = left + width - 1;
 
-    epd.drawRect(left, lineTop, width, lineHeight, GxEPD_BLACK);
-    epd.drawRect(left, barsTop, width, barsHeight, GxEPD_BLACK);
-
+    epd.drawRect(left, lineTop, width, lineHeight, BLACK);
+    epd.drawRect(left, barsTop, width, barsHeight, BLACK);
     // Dotted oscilloscope-style grid.
     for (uint8_t division = 1; division < 4; ++division) {
       const int16_t x = left + division * (width - 1) / 4;
-      for (int16_t y = lineTop + 2; y < lineTop + lineHeight - 1; y += 4) {
-        epd.drawPixel(x, y, GxEPD_BLACK);
-      }
-      for (int16_t y = barsTop + 2; y < barsTop + barsHeight - 1; y += 4) {
-        epd.drawPixel(x, y, GxEPD_BLACK);
-      }
+      for (int16_t y = lineTop + 2; y < lineTop + lineHeight - 1; y += 4) epd.drawPixel(x, y, BLACK);
+      for (int16_t y = barsTop + 2; y < barsTop + barsHeight - 1; y += 4) epd.drawPixel(x, y, BLACK);
     }
-    for (uint8_t division = 1; division < 2; ++division) {
-      const int16_t lineY = lineTop + division * (lineHeight - 1) / 2;
-      const int16_t barsY = barsTop + division * (barsHeight - 1) / 2;
-      for (int16_t x = left + 2; x < right; x += 4) {
-        epd.drawPixel(x, lineY, GxEPD_BLACK);
-        epd.drawPixel(x, barsY, GxEPD_BLACK);
-      }
+    const int16_t lineMid = lineTop + (lineHeight - 1) / 2;
+    const int16_t barsMid = barsTop + (barsHeight - 1) / 2;
+    for (int16_t x = left + 2; x < right; x += 4) {
+      epd.drawPixel(x, lineMid, BLACK);
+      epd.drawPixel(x, barsMid, BLACK);
     }
-
-    epd.setTextSize(1);
-    epd.setCursor(5, 36); epd.print("100");
-    epd.setCursor(11, 61); epd.print("50");
-    epd.setCursor(17, 84); epd.print("0");
-    epd.setCursor(5, 102); epd.print("100");
-    epd.setCursor(11, 132); epd.print("50");
-    epd.setCursor(17, 160); epd.print("0");
+    text("100", 8, lineTop + 1);
+    text("50", 14, lineMid - 3);
+    text("0", 20, lineTop + lineHeight - 8);
+    text("100", 8, barsTop + 1);
+    text("50", 14, barsMid - 3);
+    text("0", 20, barsTop + barsHeight - 8);
 
     uint32_t durationUs = 0;
-    if (samples && count > 1 && peakRpm) {
+    if (count > 1 && peakRpm) {
       const uint32_t firstTime = samples[0].timestampUs;
       durationUs = samples[count - 1].timestampUs - firstTime;
       if (durationUs == 0) durationUs = 1;
-
-      const uint32_t firstRpm = samples[0].rpm > peakRpm
-                                    ? peakRpm : samples[0].rpm;
+      const auto yFor = [&](uint32_t rpm) {
+        return static_cast<int16_t>(lineTop + lineHeight - 2 -
+            static_cast<uint64_t>(min(rpm, peakRpm)) * (lineHeight - 3) / peakRpm);
+      };
       int16_t previousX = left + 1;
-      int16_t previousY = lineTop + lineHeight - 2 -
-          static_cast<uint64_t>(firstRpm) * (lineHeight - 3) / peakRpm;
+      int16_t previousY = yFor(samples[0].rpm);
       const int16_t pointRadius = count <= 12 ? 2 : 1;
-      if (count <= 40) {
-        epd.fillCircle(previousX, previousY, pointRadius, GxEPD_BLACK);
-      }
+      if (count <= 40) epd.fillCircle(previousX, previousY, pointRadius, BLACK);
       int16_t lastHatchX = -10;
       for (uint16_t i = 1; i < count; ++i) {
         const int16_t x = left + 1 +
-            static_cast<uint64_t>(samples[i].timestampUs - firstTime) *
-            (width - 3) / durationUs;
-        const uint32_t rpm = samples[i].rpm > peakRpm
-                                 ? peakRpm : samples[i].rpm;
-        const int16_t y = lineTop + lineHeight - 2 -
-            static_cast<uint64_t>(rpm) * (lineHeight - 3) / peakRpm;
-        epd.drawLine(previousX, previousY, x, y, GxEPD_BLACK);
-        if (count <= 40) epd.fillCircle(x, y, pointRadius, GxEPD_BLACK);
-        // Sparse fill makes the curve readable without creating a large black block.
+            static_cast<uint64_t>(samples[i].timestampUs - firstTime) * (width - 3) / durationUs;
+        const int16_t y = yFor(samples[i].rpm);
+        epd.drawLine(previousX, previousY, x, y, BLACK);
+        if (count <= 40) epd.fillCircle(x, y, pointRadius, BLACK);
+        // Sparse fill keeps the curve readable without a solid black block.
         if (x - lastHatchX >= 4) {
-          epd.drawFastVLine(x, y, lineTop + lineHeight - 2 - y, GxEPD_BLACK);
+          epd.drawFastVLine(x, y, lineTop + lineHeight - 2 - y, BLACK);
           lastHatchX = x;
         }
         previousX = x;
         previousY = y;
       }
-
       constexpr uint8_t barCount = 18;
       const int16_t barStep = (width - 3) / barCount;
       const int16_t barWidth = barStep > 2 ? barStep - 2 : 1;
@@ -368,27 +435,128 @@ void Display::showGraph(const RpmSample* samples, uint16_t count, uint32_t peakR
         if (end <= begin) end = begin + 1;
         if (end > count) end = count;
         uint32_t binPeak = 0;
-        for (uint16_t i = begin; i < end; ++i) {
-          if (samples[i].rpm > binPeak) binPeak = samples[i].rpm;
-        }
-        if (binPeak > peakRpm) binPeak = peakRpm;
-        const int16_t barHeight = static_cast<uint64_t>(binPeak) *
-            (barsHeight - 4) / peakRpm;
+        for (uint16_t i = begin; i < end; ++i) binPeak = max(binPeak, samples[i].rpm);
+        const int16_t barHeight = static_cast<uint64_t>(min(binPeak, peakRpm)) * (barsHeight - 4) / peakRpm;
         if (barHeight > 0) {
-          epd.fillRect(left + 2 + bar * barStep,
-                       barsTop + barsHeight - 2 - barHeight,
-                       barWidth, barHeight, GxEPD_BLACK);
+          epd.fillRect(left + 2 + bar * barStep, barsTop + barsHeight - 2 - barHeight,
+                       barWidth, barHeight, BLACK);
         }
       }
     } else {
-      centered("NO PROFILE DATA", 127, 1);
+      epd.fillRect(left + 20, 130, width - 40, 14, WHITE);
+      centered("NO PROFILE DATA", 133);
     }
-
-    epd.setTextSize(1);
-    epd.setCursor(7, 174);
-    epd.printf("TIME %lums", static_cast<unsigned long>(durationUs / 1000));
-    epd.setCursor(96, 174);
-    epd.printf("PEAK %lu", static_cast<unsigned long>(peakRpm));
-    epd.setCursor(67, 189); epd.print("RPM / TIME");
+    char time[20], peak[20];
+    snprintf(time, sizeof(time), "TIME %lums", static_cast<unsigned long>(durationUs / 1000));
+    snprintf(peak, sizeof(peak), "PEAK %lu", static_cast<unsigned long>(peakRpm));
+    footer(time, peak);
   } while (epd.nextPage());
+}
+}  // namespace
+
+bool Display::begin() {
+  SPI.begin(Config::PIN_EPD_SCK, -1, Config::PIN_EPD_MOSI, Config::PIN_EPD_CS);
+  // WeAct's official ESP32-C3 example uses a 50 ms reset pulse.
+  // Shorter pulses leave some SSD1681 revisions unresponsive.
+  epd.init(Config::SERIAL_BAUD, true, 50, false);
+  epd.setRotation(0);
+  epd.setTextColor(BLACK);
+  epd.setTextWrap(false);
+  lock_ = xSemaphoreCreateMutex();
+  // Core 0: loop() and ADC processing stay on core 1.
+  if (lock_ && xTaskCreatePinnedToCore(renderTask, "epd", 8192, this, 1, &task_, 0) != pdPASS) {
+    task_ = nullptr;
+  }
+  available_ = true;
+  return true;
+}
+
+void Display::renderTask(void* arg) {
+  Display* self = static_cast<Display*>(arg);
+  for (;;) {
+    ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+    for (;;) {
+      std::function<void()> job;
+      xSemaphoreTake(self->lock_, portMAX_DELAY);
+      job.swap(self->pending_);
+      self->drawing_ = static_cast<bool>(job);
+      xSemaphoreGive(self->lock_);
+      if (!job) break;
+      job();
+    }
+  }
+}
+
+void Display::post(std::function<void()> job) {
+  if (!task_) {  // No render task: draw synchronously, as before.
+    job();
+    return;
+  }
+  xSemaphoreTake(lock_, portMAX_DELAY);
+  pending_ = std::move(job);
+  xSemaphoreGive(lock_);
+  xTaskNotifyGive(task_);
+}
+
+void Display::waitIdle() {
+  if (!task_) return;
+  for (;;) {
+    xSemaphoreTake(lock_, portMAX_DELAY);
+    const bool idle = !pending_ && !drawing_;
+    xSemaphoreGive(lock_);
+    if (idle) return;
+    vTaskDelay(pdMS_TO_TICKS(5));
+  }
+}
+
+void Display::hibernate() {
+  waitIdle();
+  epd.hibernate();
+}
+
+void Display::showBoot() { post([] { drawBoot(); }); }
+
+void Display::showCalibrating(uint16_t minimum, uint16_t maximum) {
+  post([=] { drawCalibrating(minimum, maximum); });
+}
+
+void Display::showInsertBlade(uint32_t bestRpm, uint32_t launchCount) {
+  post([=] { drawInsertBlade(bestRpm, launchCount); });
+}
+
+void Display::showReady(uint32_t bestRpm, uint32_t launchCount) {
+  post([=] { drawReady(bestRpm, launchCount); });
+}
+
+void Display::showResult(const LaunchRecord& record, uint32_t bestRpm, bool newBest) {
+  post([=] { drawResult(record, bestRpm, newBest); });
+}
+
+void Display::showInvalidLaunch() { post([] { drawInvalidLaunch(); }); }
+
+void Display::showSensorError(uint16_t minimum, uint16_t maximum) {
+  post([=] { drawSensorError(minimum, maximum); });
+}
+
+void Display::showHistory(const LaunchRecord* record, uint8_t position, uint8_t count) {
+  const LaunchRecord copy = record ? *record : LaunchRecord{};
+  const bool hasRecord = record != nullptr;
+  post([=] { drawHistory(hasRecord, copy, position, count); });
+}
+
+void Display::showMenu(uint8_t item) { post([=] { drawMenu(item); }); }
+
+void Display::showClearConfirmation() { post([] { drawClearConfirmation(); }); }
+
+void Display::showService(uint16_t raw, uint16_t minimum, uint16_t maximum,
+                          uint16_t low, uint16_t high, uint32_t transitions,
+                          bool state) {
+  post([=] { drawService(raw, minimum, maximum, low, high, transitions, state); });
+}
+
+void Display::showGraph(const RpmSample* samples, uint16_t count, uint32_t peakRpm) {
+  // Copy: the caller's buffer may be reused by the next launch while drawing.
+  std::vector<RpmSample> copy;
+  if (samples && count) copy.assign(samples, samples + count);
+  post([copy = std::move(copy), peakRpm] { drawGraph(copy, peakRpm); });
 }

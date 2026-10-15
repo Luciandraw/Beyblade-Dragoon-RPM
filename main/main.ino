@@ -57,16 +57,44 @@ void enterReady() {
 }
 
 void enterDeepSleep() {
-  Serial.println("SLEEP: logo displayed; waiting for center button");
+  // Wake on the center button, or on blade insertion. If a blade is already
+  // seated its pin is held LOW and would wake the board at once, so it is
+  // left out of the mask; the center button still works.
+  const bool bladeSeated = buttons.bladePresent();
+  uint64_t wakeMask = 1ULL << Config::PIN_BUTTON_CENTER;
+  if (!bladeSeated) wakeMask |= 1ULL << Config::PIN_BLADE_PRESENT;
+  Serial.printf("SLEEP: logo displayed; waiting for center button%s\n",
+                bladeSeated ? "" : " or blade");
+  sensor.setActive(false);
   display.showBoot();
-  display.hibernate();
+  display.hibernate();  // Waits for the logo to finish drawing.
   Serial.flush();
 
-  const gpio_num_t wakePin = static_cast<gpio_num_t>(Config::PIN_BUTTON_CENTER);
-  rtc_gpio_pulldown_dis(wakePin);
-  rtc_gpio_pullup_en(wakePin);
-  esp_sleep_enable_ext0_wakeup(wakePin, 0);
+  for (const uint8_t pin : {Config::PIN_BUTTON_CENTER, Config::PIN_BLADE_PRESENT}) {
+    const gpio_num_t wakePin = static_cast<gpio_num_t>(pin);
+    rtc_gpio_init(wakePin);
+    rtc_gpio_set_direction(wakePin, RTC_GPIO_MODE_INPUT_ONLY);
+    rtc_gpio_pulldown_dis(wakePin);
+    rtc_gpio_pullup_en(wakePin);
+  }
+  // RTC pull-ups need the RTC peripheral domain powered during ext1 sleep.
+  esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_ON);
+  esp_sleep_enable_ext1_wakeup_io(wakeMask, ESP_EXT1_WAKEUP_ANY_LOW);
   esp_deep_sleep_start();
+}
+
+// The ADC stream and full CPU speed are needed only while a launch can be
+// measured, during calibration, and on the service screen.
+void updatePowerMode() {
+  const AppState state = app.get();
+  const bool needSensor = serviceView || state == AppState::Calibrating ||
+                          state == AppState::Measuring ||
+                          (state == AppState::Ready && bladeArmed);
+  if (needSensor == sensor.active()) return;
+  if (needSensor) setCpuFrequencyMhz(240);
+  sensor.setActive(needSensor);
+  if (!needSensor) setCpuFrequencyMhz(80);
+  if (Config::DEBUG_SENSOR) Serial.printf("POWER: sensor %s\n", needSensor ? "on" : "off");
 }
 
 void showCurrentMenu() {
@@ -159,26 +187,42 @@ void handleMenu(const ButtonEvents& events) {
 }
 
 void setup() {
-  const bool wokeFromCenter =
-      esp_sleep_get_wakeup_cause() == ESP_SLEEP_WAKEUP_EXT0;
+  const bool wokeFromSleep =
+      esp_sleep_get_wakeup_cause() == ESP_SLEEP_WAKEUP_EXT1;
+  const uint64_t wakePins = wokeFromSleep ? esp_sleep_get_ext1_wakeup_status() : 0;
+  const bool wokeFromCenter = wakePins & (1ULL << Config::PIN_BUTTON_CENTER);
+  const bool wokeFromBlade = wakePins & (1ULL << Config::PIN_BLADE_PRESENT);
   Serial.begin(Config::SERIAL_BAUD);
   delay(250);
   Serial.println("BOOT: serial OK");
-  if (wokeFromCenter) {
+  if (wokeFromSleep) {
     rtc_gpio_deinit(static_cast<gpio_num_t>(Config::PIN_BUTTON_CENTER));
+    rtc_gpio_deinit(static_cast<gpio_num_t>(Config::PIN_BLADE_PRESENT));
   }
   buttons.begin();
   sensor.begin();
   storage.begin();
+  SensorCalibration calibration;
+  if (storage.loadCalibration(calibration)) {
+    sensor.applyCalibration(calibration);
+    Serial.printf("CAL: restored low=%u high=%u\n", calibration.thresholdLow,
+                  calibration.thresholdHigh);
+  }
+  // Nothing can be measured until READY with a blade; start in low power.
+  sensor.setActive(false);
+  setCpuFrequencyMhz(80);
   Serial.println("EPD: initializing");
   display.begin();
   Serial.println("EPD: initialization returned");
   app.set(AppState::Boot);
-  if (!wokeFromCenter) {
+  if (!wokeFromSleep) {
     display.showBoot();
-  } else {
+  } else if (wokeFromCenter) {
     suppressWakeButton = true;
     Serial.println("WAKE: center button");
+  } else if (wokeFromBlade) {
+    // The logo is still on the panel; READY (armed) follows after Boot.
+    Serial.println("WAKE: blade inserted");
   }
   lastActivityMs = millis();
   Serial.printf("Beyblade RPM Analyzer; panel=%s\n", Config::EPD_DRIVER_NAME);
@@ -231,6 +275,7 @@ void loop() {
     }
   }
 
+  updatePowerMode();
   const AppState currentState = app.get();
   if (currentState != AppState::Measuring &&
       currentState != AppState::Calibrating &&
@@ -269,6 +314,7 @@ void loop() {
     case AppState::Calibrating:
       if (sensor.calibrationFinished()) {
         if (sensor.finishCalibration()) {
+          if (!storage.saveCalibration(sensor.calibration())) Serial.println("CAL: save failed");
           Serial.printf("CAL OK min=%u max=%u low=%u high=%u\n", sensor.minimum(),
                         sensor.maximum(), sensor.thresholdLow(), sensor.thresholdHigh());
           enterReady();
@@ -301,5 +347,7 @@ void loop() {
       if (events.centerPressed || events.centerDouble || events.centerLong) enterCalibration();
       break;
   }
-  yield();
+  updatePowerMode();
+  // With the sensor off there is nothing time-critical: let the CPU idle.
+  if (!sensor.active()) delay(10); else yield();
 }

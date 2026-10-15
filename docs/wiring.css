@@ -13,29 +13,29 @@
 .component:hover::before,.component[aria-pressed=true]::before{visibility:visible}
 .component[aria-pressed=true]{background:var(--ink)}.component[aria-pressed=true] .component-label{color:var(--hi)!important}
 /* The photo diagram is a dark LCD so the wire colors keep their contrast. */
-#contact-view{overflow-x:auto;margin-top:16px;padding:10px;background:var(--gb3);border:3px solid var(--ink);border-radius:4px;box-shadow:inset 0 0 0 3px var(--gb3),inset 0 0 0 5px var(--gb2)}
-#contact-view>svg{display:block;width:100%;min-width:760px;background:var(--gb3)}
-#contact-view text{fill:inherit;font:600 17px var(--body);paint-order:stroke;stroke:var(--gb3);stroke-width:6px;stroke-linejoin:round}
+#contact-view{overflow-x:auto;margin-top:16px;padding:10px;background:var(--scr-bg);border:3px solid var(--ink);border-radius:4px;box-shadow:inset 0 0 0 3px var(--scr-bg),inset 0 0 0 5px var(--scr-line)}
+#contact-view>svg{display:block;width:100%;min-width:760px;background:var(--scr-bg)}
+#contact-view text{fill:inherit;font:600 17px var(--body);paint-order:stroke;stroke:var(--scr-bg);stroke-width:6px;stroke-linejoin:round}
 #contact-view g[data-component-photo],#contact-view text[data-component-label]{cursor:pointer}
 #contact-view text[data-component-label]{font-size:19px}
 .wire-legend{display:flex;flex-wrap:wrap;gap:8px;padding:12px 2px 4px}
-.wire-legend button{width:auto;gap:8px;padding:6px 10px;border:2px solid var(--wire-color);border-radius:0;background:var(--gb3);color:var(--wire-color);font:var(--fs-small)/1.2 var(--body);box-shadow:none}
+.wire-legend button{width:auto;gap:8px;padding:6px 10px;border:2px solid var(--wire-color);border-radius:0;background:var(--scr-bg);color:var(--wire-color);font:var(--fs-small)/1.2 var(--body);box-shadow:none}
 .wire-legend button::before{content:"";width:8px;height:8px;background:var(--wire-color);flex-shrink:0}
-.wire-legend button:hover:not(:disabled){transform:none;box-shadow:none;background:#34352f}
-.wire-legend button[aria-pressed=true]{background:var(--wire-color);color:var(--gb3)}.wire-legend button[aria-pressed=true]::before{background:var(--gb3)}
+.wire-legend button:hover:not(:disabled){transform:none;box-shadow:none;background:var(--scr-hover)}
+.wire-legend button[aria-pressed=true]{background:var(--wire-color);color:var(--scr-bg)}.wire-legend button[aria-pressed=true]::before{background:var(--scr-bg)}
 .map-caption{padding:0 16px 16px;margin:0;color:var(--muted);font-size:var(--fs-small)}
 /* Connection detail: second LCD, colored rows match the wires. */
-.connection-panel{padding:26px;background:var(--gb3);color:var(--gb0);border-color:var(--ink);box-shadow:inset 0 0 0 3px var(--gb3),inset 0 0 0 5px var(--gb2),6px 6px 0 var(--gb1);min-width:0}
-.connection-panel .eyebrow,.detail-tag{color:var(--gb1)}
+.connection-panel{padding:26px;background:var(--scr-bg);color:var(--scr-ink);border-color:var(--ink);box-shadow:inset 0 0 0 3px var(--scr-bg),inset 0 0 0 5px var(--scr-line),6px 6px 0 var(--gb1);min-width:0}
+.connection-panel .eyebrow,.detail-tag{color:var(--scr-muted)}
 #connection-detail{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);column-gap:36px;align-items:start}
 #connection-detail>h2,#connection-detail>.detail-tag{grid-column:1/-1}
 #connection-detail h2{line-height:1.6}
 .detail-tag{font:var(--fs-label) var(--pixel);margin:10px 0 18px}
 .pin-table{border-collapse:collapse;width:100%;font-size:var(--fs-body)}
-.pin-table th{text-align:left;font:var(--fs-label) var(--pixel);color:var(--gb1)}
-.pin-table th,.pin-table td{padding:9px 8px;border-bottom:2px dotted var(--gb2);overflow-wrap:anywhere}
+.pin-table th{text-align:left;font:var(--fs-label) var(--pixel);color:var(--scr-muted)}
+.pin-table th,.pin-table td{padding:9px 8px;border-bottom:2px dotted var(--scr-line);overflow-wrap:anywhere}
 .pin-table td:first-child{font-family:var(--pixel);font-size:var(--fs-label)}.pin-table td:last-child{font-weight:600}
-.connection-note{margin:0;padding:14px 16px;color:var(--gb0);border:2px dashed var(--gb2)}
+.connection-note{margin:0;padding:14px 16px;color:var(--scr-ink);border:2px dashed var(--scr-line)}
 .power-notes{border-top:4px solid var(--ink);padding:28px 0}.power-notes h2{margin-bottom:22px}
 .safety-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
 .safety-grid p{margin:0;padding:18px 20px;color:var(--muted)}

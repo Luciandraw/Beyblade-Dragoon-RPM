@@ -5,7 +5,7 @@ import {translate} from '../docs/language.js';
 import {polish} from '../docs/translations.mjs';
 test('Polish dictionary is complete for visible HTML text and component details',async()=>{
  const unchanged=new Set(['R','BEYBLADE','RPM','BEYBLADE RPM','BEYBLADE RPM / ESP32-S3-Zero','V2.','ESP32-S3-Zero','FLASH','PSRAM','4 MB','01','0%']);
- for(const page of ['index','model','wiring']){
+ for(const page of ['index','model','wiring','screens']){
    const html=fs.readFileSync(new URL(`../docs/${page}.html`,import.meta.url),'utf8');
    assert.ok(html.includes('./language.js'));
    const source=html.replace(/<script[\s\S]*?<\/script>/g,'');
