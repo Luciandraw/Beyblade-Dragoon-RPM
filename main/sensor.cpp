@@ -153,34 +153,6 @@ bool Sensor::readContinuous(uint16_t& raw, uint32_t& timestampUs) {
   return true;
 }
 
-void Sensor::applyCalibration(const SensorCalibration& calibration) {
-  minimum_ = calibration.minimum;
-  maximum_ = calibration.maximum;
-  thresholdLow_ = calibration.thresholdLow;
-  thresholdHigh_ = calibration.thresholdHigh;
-  calibrated_ = true;
-  comparatorInitialized_ = false;
-  edgePending_ = false;
-}
-
-void Sensor::setActive(bool active) {
-  if (active == active_) return;
-  active_ = active;
-  if (continuous_ && adcHandle_) {
-    if (active) {
-      // Restarting marks a discontinuity, so no period spans the pause.
-      resetContinuousStream(micros());
-    } else {
-      adc_continuous_stop(adcHandle_);
-      streamRestartPending_ = false;
-    }
-  } else if (active) {
-    discontinuityPending_ = true;
-    comparatorInitialized_ = false;
-    nextSampleUs_ = micros();
-  }
-}
-
 void Sensor::beginCalibration() {
   minimum_ = Config::ADC_MAX_VALUE;
   maximum_ = 0;
@@ -215,7 +187,6 @@ bool Sensor::finishCalibration() {
 
 bool Sensor::sample(SensorReading& reading) {
   uint32_t timestampUs = 0;
-  if (!active_) return false;
   if (continuous_) {
     if (!readContinuous(lastRaw_, timestampUs)) {
       if (!discontinuityPending_) return false;

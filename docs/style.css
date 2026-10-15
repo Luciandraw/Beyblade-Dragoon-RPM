@@ -11,29 +11,8 @@
   --fs-small: .875rem; --fs-body: 1rem; --fs-lead: 1.125rem;
   --ground: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' shape-rendering='crispEdges'%3E%3Crect width='24' height='24' fill='%23e8e9e2'/%3E%3Cg fill='%23b9bbb1'%3E%3Crect x='3' y='4' width='2' height='2'/%3E%3Crect x='15' y='15' width='2' height='2'/%3E%3Crect x='18' y='3' width='2' height='1'/%3E%3Crect x='7' y='17' width='1' height='2'/%3E%3C/g%3E%3C/svg%3E");
   --checker: repeating-conic-gradient(var(--gb1) 0 25%, transparent 0 50%) 0 0 / 4px 4px;
-  /* Diagram "screens" stay dark in both themes so wire colors keep their contrast. */
-  --scr-bg: #23241f; --scr-ink: #e8e9e2; --scr-muted: #b9bbb1; --scr-line: #6e7068; --scr-hover: #34352f;
-  color-scheme: light;
   font-family: var(--body); font-size: 16px; color: var(--ink); background: var(--gb0); line-height: 1.55;
 }
-/* Dark theme: the same four shades, inverted like a backlit Game Boy screen.
-   Follows the system setting unless the header toggle picked a theme. */
-:root[data-theme=dark] {
-  --gb0: #181915; --gb1: #34362f; --gb2: #858879; --gb3: #e4e6dc; --hi: #22231e; --muted: #a6a89d;
-  --ground: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' shape-rendering='crispEdges'%3E%3Crect width='24' height='24' fill='%23181915'/%3E%3Cg fill='%2334362f'%3E%3Crect x='3' y='4' width='2' height='2'/%3E%3Crect x='15' y='15' width='2' height='2'/%3E%3Crect x='18' y='3' width='2' height='1'/%3E%3Crect x='7' y='17' width='1' height='2'/%3E%3C/g%3E%3C/svg%3E");
-  --scr-bg: #0e0f0c; --scr-line: #4a4c44; --scr-hover: #22231e;
-  color-scheme: dark;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme=light]) {
-    --gb0: #181915; --gb1: #34362f; --gb2: #858879; --gb3: #e4e6dc; --hi: #22231e; --muted: #a6a89d;
-    --ground: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' shape-rendering='crispEdges'%3E%3Crect width='24' height='24' fill='%23181915'/%3E%3Cg fill='%2334362f'%3E%3Crect x='3' y='4' width='2' height='2'/%3E%3Crect x='15' y='15' width='2' height='2'/%3E%3Crect x='18' y='3' width='2' height='1'/%3E%3Crect x='7' y='17' width='1' height='2'/%3E%3C/g%3E%3C/svg%3E");
-    --scr-bg: #0e0f0c; --scr-line: #4a4c44; --scr-hover: #22231e;
-    color-scheme: dark;
-  }
-}
-#site-theme { width: 40px; height: 40px; padding: 0; border: 3px solid var(--ink); border-radius: 0; background: var(--hi); color: var(--ink); font-size: 1rem; box-shadow: 3px 3px 0 var(--gb1); }
-#site-theme:hover:not(:disabled) { transform: none; background: var(--ink); color: var(--hi); box-shadow: 3px 3px 0 var(--gb1); }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
 body { margin: 0; min-height: 100vh; background: var(--ground) var(--gb0); }
@@ -135,8 +114,6 @@ footer a { text-decoration: none; } footer a:hover { background: var(--ink); col
 .footer-divider { margin: 0 9px; }
 
 @media (max-width: 850px) { .workspace { gap: 28px; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); } .installer { padding: 24px; } .panel-number { display: none; } }
-/* Medium widths: brand, language and theme on one row, navigation below. */
-@media (max-width: 960px) { header nav { order: 3; width: 100%; margin: 0 -12px; } #site-language { margin-left: auto; } }
 @media (max-width: 680px) {
   main { padding: 0 16px; } header { min-height: 0; padding: 10px 0; gap: 10px; } .header-label { display: none; }
   header nav { order: 3; width: 100%; margin: 0 -12px; }

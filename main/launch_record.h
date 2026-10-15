@@ -13,14 +13,6 @@ struct LaunchRecord {
   uint16_t reserved = 0;
 };
 
-// Sensor thresholds from a manual calibration, kept across sleep and reboot.
-struct SensorCalibration {
-  uint16_t minimum = 0;
-  uint16_t maximum = 0;
-  uint16_t thresholdLow = 0;
-  uint16_t thresholdHigh = 0;
-};
-
 struct RpmSample {
   uint32_t timestampUs;
   uint32_t rpm;

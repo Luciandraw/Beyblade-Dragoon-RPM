@@ -40,31 +40,6 @@ bool Storage::getNewest(uint8_t offset, LaunchRecord& record) const {
   return true;
 }
 
-// Calibration lives under its own key, so clearing history keeps it.
-bool Storage::saveCalibration(const SensorCalibration& calibration) {
-  const PersistedCalibration stored{CALIBRATION_MAGIC, calibration};
-  return preferences_.putBytes("cal", &stored, sizeof(stored)) == sizeof(stored);
-}
-
-bool Storage::loadCalibration(SensorCalibration& calibration) {
-  PersistedCalibration stored{};
-  if (preferences_.getBytesLength("cal") != sizeof(stored) ||
-      preferences_.getBytes("cal", &stored, sizeof(stored)) != sizeof(stored) ||
-      stored.magic != CALIBRATION_MAGIC) {
-    return false;
-  }
-  const SensorCalibration& c = stored.values;
-  // Reject anything the calibration routine itself could not have produced.
-  if (c.maximum <= c.minimum || c.maximum > Config::ADC_MAX_VALUE ||
-      c.maximum - c.minimum < Config::SENSOR_MIN_CONTRAST ||
-      c.thresholdLow < c.minimum || c.thresholdHigh > c.maximum ||
-      c.thresholdLow >= c.thresholdHigh) {
-    return false;
-  }
-  calibration = c;
-  return true;
-}
-
 bool Storage::clear() {
   data_ = PersistedData{};
   data_.magic = MAGIC;

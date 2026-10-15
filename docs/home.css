@@ -1,7 +1,7 @@
-.home-hero{position:relative;isolation:isolate;background:var(--ground) var(--gb0);min-height:500px;display:flex;align-items:center;border-bottom:4px solid var(--ink);overflow:hidden}
+.home-hero{position:relative;isolation:isolate;min-height:500px;display:flex;align-items:center;border-bottom:4px solid var(--ink);overflow:hidden}
 /* Line-art launcher, inverted to dark ink on the LCD ground. */
 .home-hero::before{content:"";position:absolute;z-index:-2;inset:0 0 0 30%;background:url('./launcher-background.png') center right/contain no-repeat;filter:invert(1) grayscale(1) contrast(1.6);mix-blend-mode:multiply;opacity:.55;pointer-events:none}
-.home-hero::after{content:"";position:absolute;z-index:-1;inset:0;background:linear-gradient(90deg,var(--gb0) 0%,color-mix(in srgb,var(--gb0) 88%,transparent) 30%,color-mix(in srgb,var(--gb0) 0%,transparent) 66%);pointer-events:none}
+.home-hero::after{content:"";position:absolute;z-index:-1;inset:0;background:linear-gradient(90deg,var(--gb0) 0%,#e8e9e2e0 30%,#e8e9e200 66%);pointer-events:none}
 .hero-copy{flex:1;min-width:0;padding:56px 0 80px;max-width:640px}
 .hero-copy h1{font-size:clamp(1.75rem,4.6vw,3.1rem);line-height:1.45}
 .hero-copy>p:not(.eyebrow){display:inline-block;color:var(--ink);font-size:var(--fs-lead);margin:22px 0 30px;padding:14px 20px;background:var(--hi);border:3px solid var(--ink);border-radius:6px;box-shadow:inset 0 0 0 3px var(--hi),inset 0 0 0 5px var(--ink),6px 6px 0 var(--gb1)}
@@ -21,8 +21,5 @@
 .explore-grid h2 span{margin-left:auto}
 .explore-grid p{color:var(--muted);margin:14px 0 0}
 .install-intro h2{font-size:clamp(var(--fs-h2),2.4vw,1.5rem)}
-@media(max-width:680px){.home-hero{min-height:440px}.hero-copy{padding:40px 0 66px}.home-hero::before{inset:0 -120px 0 0;opacity:.3}.home-hero::after{background:color-mix(in srgb,var(--gb0) 63%,transparent)}.hero-caption{left:0;right:auto}.explore-grid{grid-template-columns:1fr;gap:16px;margin-bottom:36px}.explore-grid>a{padding:20px}.explore-grid h2::before{display:none}}
+@media(max-width:680px){.home-hero{min-height:440px}.hero-copy{padding:40px 0 66px}.home-hero::before{inset:0 -120px 0 0;opacity:.3}.home-hero::after{background:#e8e9e2a0}.hero-caption{left:0;right:auto}.explore-grid{grid-template-columns:1fr;gap:16px;margin-bottom:36px}.explore-grid>a{padding:20px}.explore-grid h2::before{display:none}}
 @media(prefers-reduced-motion:reduce){.explore-grid>a,.primary-link{transition:none}}
-/* Dark theme: line art stays light, blended onto the dark ground. */
-:root[data-theme=dark] .home-hero::before{filter:grayscale(1) contrast(1.3);mix-blend-mode:screen;opacity:.45}
-@media(prefers-color-scheme:dark){:root:not([data-theme=light]) .home-hero::before{filter:grayscale(1) contrast(1.3);mix-blend-mode:screen;opacity:.45}}
