@@ -79,7 +79,7 @@ export const polish = {
   "Assemble": "Złóż model",
   "Clear selection": "Wyczyść wybór",
   "Wireframe": "Widok krawędzi",
-  "Clean feature edges · hidden rear lines · cyan selection": "Wyraźne krawędzie · ukryte tylne linie · błękitne zaznaczenie",
+  "Clean feature edges · hidden rear lines · green selection": "Wyraźne krawędzie · ukryte tylne linie · zielone zaznaczenie",
   "Assembly separation": "Rozsunięcie części",
   "Assembled": "Złożony",
   "Exploded": "Rozstrzelony",

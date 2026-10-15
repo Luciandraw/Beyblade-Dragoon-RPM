@@ -17,3 +17,20 @@ const key = name => name.replace(/[^a-z0-9]/gi, '').toLowerCase();
 const byName = new Map(layers.flatMap(([layer,names]) => names.map(name => [key(name),layer])));
 export function explosionLayer(name) { return byName.get(key(name)) ?? 0; }
 export function explosionOffset(name, gap) { return [0, explosionLayer(name)*gap, 0]; }
+// Stack layers by their real height so neighbouring layers never overlap.
+// bounds: Map(layer → [minY, maxY]) of the assembled model; returns Map(layer → shiftY).
+// Layer 0 (Case) stays put; higher layers rise, lower layers drop, each clearing the next by gap.
+export function layerShifts(bounds, gap) {
+  const layers = [...bounds.keys()].sort((a, b) => a - b);
+  const base = layers.reduce((best, layer) => Math.abs(layer) < Math.abs(best) ? layer : best, layers[0]);
+  const shifts = new Map([[base, 0]]);
+  for (const [direction, list] of [[1, layers.filter(l => l > base)], [-1, layers.filter(l => l < base).reverse()]]) {
+    let previous = 0, edge = bounds.get(base)[direction > 0 ? 1 : 0];
+    for (const layer of list) {
+      const [min, max] = bounds.get(layer);
+      const shift = direction > 0 ? Math.max(previous, edge + gap - min) : Math.min(previous, edge - gap - max);
+      shifts.set(layer, shift); previous = shift; edge = (direction > 0 ? max : min) + shift;
+    }
+  }
+  return shifts;
+}

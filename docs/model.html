@@ -1,19 +1,19 @@
 <!doctype html>
 <html lang="en"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="dark">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light"><meta name="theme-color" content="#e8e9e2">
 <title>Beyblade RPM — 3D viewer</title><meta name="description" content="Explore the Launcher V2 assembly in 3D.">
-<link rel="icon" href="./favicon.svg"><link rel="stylesheet" href="./style.css"><link rel="stylesheet" href="./model.css">
+<link rel="icon" href="./favicon.svg"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;600&family=Press+Start+2P&display=swap"><link rel="stylesheet" href="./style.css?v=20261015"><link rel="stylesheet" href="./model.css?v=20261015">
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"}}</script>
-<script type="module" src="./model.js?v=20260914-26parts"></script>
-<link rel="stylesheet" href="./language.css">
-<script type="module" src="./language.js"></script>
+<script type="module" src="./model.js?v=20261015-gb6"></script>
+<link rel="stylesheet" href="./language.css?v=20261015">
+<script type="module" src="./language.js?v=20261015"></script>
 </head><body><main>
-<header><a href="./" class="brand"><span class="brand-mark" aria-hidden="true">R</span><span>BEYBLADE <b>RPM</b></span></a><a href="./wiring.html">← Wiring guide</a></header>
+<header><a href="./" class="brand"><span class="brand-mark" aria-hidden="true">R</span><span>BEYBLADE <b>RPM</b></span></a><nav class="site-nav" aria-label="Main navigation"><a href="./model.html" aria-current="page">3D assembly</a><a href="./wiring.html">Wiring diagram</a><a href="./#installer">Firmware</a></nav></header>
 <div class="page-heading"><p class="eyebrow">HARDWARE / 3D ASSEMBLY</p><h1>Launcher <em>V2.</em></h1><p>Drag to rotate. Scroll or pinch to zoom. Right-drag to pan.</p></div>
 <section class="model-shell" aria-label="Launcher V2 interactive model">
 <div id="viewport" aria-label="3D model canvas"></div>
 <div class="model-toolbar"><button id="load-model" type="button">Load 3D model · 12.1 MB</button><button id="reset-camera" type="button" disabled>Fit view</button><button id="explode-model" type="button" disabled>Explode assembly</button><button id="assemble-model" type="button" disabled>Assemble</button><button id="clear-selection" type="button" disabled>Clear selection</button></div>
-<div class="model-toolbar render-toolbar"><button id="wireframe-mode" type="button" aria-pressed="false" aria-describedby="wireframe-hint" disabled>Wireframe</button><span id="wireframe-hint">Clean feature edges · hidden rear lines · cyan selection</span></div>
+<div class="model-toolbar render-toolbar"><button id="wireframe-mode" type="button" aria-pressed="false" aria-describedby="wireframe-hint" disabled>Wireframe</button><span id="wireframe-hint">Clean feature edges · hidden rear lines · green selection</span></div>
 <div class="explosion-control"><label for="explosion">Assembly separation <output id="explosion-value">0%</output></label><input id="explosion" type="range" min="0" max="100" value="0" disabled><div><span>Assembled</span><span>Exploded</span></div></div>
 <p id="model-status" role="status" aria-live="polite">The model downloads only when you press Load. WebGL 2 is required.</p>
 </section>

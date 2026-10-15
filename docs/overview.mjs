@@ -96,5 +96,7 @@ export function drawOverview(selected,container,onSelect){
    if(c.via){svg.append(el('rect',{x:rail-23,y:lane-10,width:46,height:20,fill:'#161b17',stroke:color,'stroke-width':2}),text(rail,lane+5,'1 kΩ',color));}
   }
  }
+ // Component names go on top so wires never cross through them.
+ for(const g of svg.querySelectorAll('[data-component-photo]')){const label=g.querySelector('text');label.dataset.componentLabel=g.dataset.componentPhoto;label.addEventListener('click',()=>onSelect(g.dataset.componentPhoto));svg.append(label);}
  container.append(svg,legend);
 }
