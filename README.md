@@ -53,7 +53,7 @@ All links below are AliExpress alternatives. Delivery availability, taxes and di
 ### Before ordering
 
 - **No separate pin headers or assembly board are required.** Use the wires supplied with the display for the display connection.
-- Required enclosure fasteners: **6 × M2 × 12 mm screws**, **2 × M2 × 8 mm screws**  and **4 × M3 × 4 mm screws**. Screw prices are not included in the component budget.
+- Required enclosure fasteners: **6 × M2 × 12 mm screws**, **2 × M2 × 4 mm screws**  and **4 × M3 × 6 mm screws**. Screw prices are not included in the component budget.
 - Switch alternatives may differ in footprint and contact arrangement. Confirm fit and identify the common/switched contacts before wiring.
 - Check the battery's permitted charge current against the charger configuration; do not assume a module's default setting is suitable for a small 200 mAh cell. Set the boost output to **5.0 V before connecting the ESP32**.
 - Also allow for the 1 kΩ sensor resistor, wire, solder, fasteners and printed enclosure. These were not priced in the supplied shopping list.
