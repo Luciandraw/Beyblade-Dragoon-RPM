@@ -138,7 +138,7 @@ The firmware does not automatically double RPM after a long period: a single opt
 
 ## Component cost summary
 
-Prices recorded on **14 September 2026**. Polish prices come from the linked listings, with the Allegro battery confirmed by a user-provided screenshot. AliExpress ESP32 and battery prices come from user-provided screenshots; six other row prices are unverified historical values embedded in the supplied URLs (original capture date unknown). Prices and stock may change, and indexed listings may lag behind checkout.
+.Prices and stock may change, and indexed listings may lag behind checkout.
 
 | Sourcing option | Priced items | Amount PLN | Amount USD | Status / limitations |
 |---|---|---:|---:|---|
@@ -146,10 +146,7 @@ Prices recorded on **14 September 2026**. Polish prices come from the linked lis
 | **Worldwide / AliExpress** | 8 of 8; 6 URL estimates | **~110.65 zł** | **~$29.69** | All listed components included; estimated variants/pack sizes need confirmation |
 
 **Both totals cover the 8 listed components. AliExpress remains an indicative estimate, not a verified checkout total.** The two shopping lists are independent: do not add their amounts together. Full packs are counted where specified, rather than just the individual parts consumed in one build.
-
-Conversion: **1 USD = 3.7267 PLN**, [NBP table 177/A/NBP/2026, 11 September 2026](https://api.nbp.pl/api/exchangerates/rates/a/usd/2026-09-11/?format=json). USD amounts are calculated from PLN and rounded independently to two decimal places; displayed row values may differ from the subtotal by a cent. Card/payment-provider exchange rates may differ.
-
-Separate pin headers and the assembly board have been removed from both shopping lists and totals. The required  **screws** are not priced and must be budgeted separately.
+ **screws** are not priced and must be budgeted separately.
 
 Shipping, additional checkout charges, tools, enclosure printing and unlisted assembly supplies are excluded. AliExpress screenshot prices include displayed VAT for the selected destination; the ESP32's displayed special-offer price is used, but no additional coupons or extra discounts are applied.
 
