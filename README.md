@@ -149,7 +149,7 @@ Prices recorded on **14 September 2026**. Polish prices come from the linked lis
 
 Conversion: **1 USD = 3.7267 PLN**, [NBP table 177/A/NBP/2026, 11 September 2026](https://api.nbp.pl/api/exchangerates/rates/a/usd/2026-09-11/?format=json). USD amounts are calculated from PLN and rounded independently to two decimal places; displayed row values may differ from the subtotal by a cent. Card/payment-provider exchange rates may differ.
 
-Separate pin headers and the assembly board have been removed from both shopping lists and totals. The required **6 × M2 × 10 mm** and **4 × M3 × 4 mm screws** are not priced and must be budgeted separately.
+Separate pin headers and the assembly board have been removed from both shopping lists and totals. The required  **screws** are not priced and must be budgeted separately.
 
 Shipping, additional checkout charges, tools, enclosure printing and unlisted assembly supplies are excluded. AliExpress screenshot prices include displayed VAT for the selected destination; the ESP32's displayed special-offer price is used, but no additional coupons or extra discounts are applied.
 
