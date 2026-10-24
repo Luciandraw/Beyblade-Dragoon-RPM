@@ -1,0 +1,12 @@
+Copyright (c) 2026 Luciandraw.
+
+The 3D model files in this folder (LauncherV2.glb) are NOT covered by the MIT
+License in the repository root. They are provided so the project website can
+show the interactive assembly view.
+
+The 3D models of this project are licensed under Creative Commons
+Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0):
+you may print, share and remix them with credit to the author, not for
+commercial purposes (no selling of files or prints), and remixes must be
+shared under the same license.
+The printable STL / 3MF files are published free on MakerWorld and Cults3D.
