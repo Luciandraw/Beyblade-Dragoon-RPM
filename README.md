@@ -148,7 +148,7 @@ The firmware does not automatically double RPM after a long period: a single opt
 **Both totals cover the 8 listed components. AliExpress remains an indicative estimate, not a verified checkout total.** The two shopping lists are independent: do not add their amounts together. Full packs are counted where specified, rather than just the individual parts consumed in one build.
  **screws** are not priced and must be budgeted separately.
 
-Shipping, additional checkout charges, tools, enclosure printing and unlisted assembly supplies are excluded. AliExpress screenshot prices include displayed VAT for the selected destination; the ESP32's displayed special-offer price is used, but no additional coupons or extra discounts are applied.
+Shipping, additional checkout charges, tools, enclosure printing and unlisted assembly supplies are excluded. 
 
 ## License
 
