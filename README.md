@@ -154,7 +154,7 @@ Shipping, additional checkout charges, tools, enclosure printing and unlisted as
 
 - **Firmware, website and scripts** (`main/`, `diagnostics/`, `docs/` code, `scripts/`, `platformio.ini`): [MIT License](LICENSE).
 - **3D model files** (`docs/models/`, and the STL / 3MF print files): [CC BY-NC-SA 4.0](docs/models/LICENSE.txt), free to print and remix with credit, no commercial use, remixes under the same license. The printable files are published free on MakerWorld and Cults3D.
-- 
+  
 Independent fan project, not affiliated with Takara Tomy or Hasbro. Beyblade is a trademark of its respective owners.
 
 [pl-esp]: https://elektroweb.pl/pl/minikomputery/2250-esp32-s3-zero-waveshare-wi-fi-24ghz-ble-spi-i2c-uart-i2s-adc-micropython.html
