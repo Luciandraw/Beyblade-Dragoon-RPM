@@ -150,6 +150,13 @@ The firmware does not automatically double RPM after a long period: a single opt
 
 Shipping, additional checkout charges, tools, enclosure printing and unlisted assembly supplies are excluded. AliExpress screenshot prices include displayed VAT for the selected destination; the ESP32's displayed special-offer price is used, but no additional coupons or extra discounts are applied.
 
+## License
+
+- **Firmware, website and scripts** (`main/`, `diagnostics/`, `docs/` code, `scripts/`, `platformio.ini`): [MIT License](LICENSE).
+- **3D model files** (`docs/models/`, and the STL / 3MF print files): not open source, all rights reserved; see [docs/models/LICENSE.txt](docs/models/LICENSE.txt). The printable files are sold on Cults3D under the Cults "Private Use" license.
+
+Independent fan project, not affiliated with Takara Tomy or Hasbro. Beyblade is a trademark of its respective owners.
+
 [pl-esp]: https://elektroweb.pl/pl/minikomputery/2250-esp32-s3-zero-waveshare-wi-fi-24ghz-ble-spi-i2c-uart-i2s-adc-micropython.html
 [pl-boost]: https://allegro.pl/produkt/ladowarka-li-ion-tp4056-z-przetwornica-dc-4-3-28v-97401841-c49c-4884-a7b6-5f43c8eaeeaa?offerId=15794012707
 [pl-sensor]: https://botland.com.pl/czujniki-odbiciowe/7684-qre1113-czujnik-odbiciowy-analogowy-sparkfun-rob-09453-5904422304867.html
