@@ -5,6 +5,7 @@
 - English landing page, interactive wiring diagram and 3D assembly viewer.
 - Static files use relative paths for GitHub Pages project URLs.
 - The full public model is included in `docs/models/LauncherV2.glb` and can be downloaded by visitors.
+- Firmware 1.1.1 replaces the boot and sleep logo with the RPM Analyzer artwork. It is packaged from the same Arduino IDE export profile; its structure, SHA-256 and the new logo bitmap were checked locally, but it has not yet been tested on the device.
 - Firmware 1.1.0 (saved calibration, blade wake, background display task, sensor power saving, Game Boy screen style) is included from the Arduino IDE export of the Waveshare ESP32-S3-Zero profile, with PSRAM disabled. The merged binary is unchanged; its structure and SHA-256 were checked locally. The user tested 1.1.0 on the device: new screens, measurement during a screen refresh, calibration surviving sleep, and blade wake.
 - Browser visual QA and an end-to-end USB installation test of the published package remain outstanding.
 
