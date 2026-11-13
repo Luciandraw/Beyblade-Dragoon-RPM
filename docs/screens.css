@@ -30,6 +30,18 @@
 .gallery figure{margin:0;padding:6px;background:#c9cbc1;border:3px solid var(--ink);border-radius:4px;box-shadow:4px 4px 0 var(--gb1)}
 .gallery canvas{display:block;width:100%;aspect-ratio:1;image-rendering:pixelated;background:#e3e4dc}
 .gallery figcaption{padding:8px 2px 2px;color:#23241f;font:var(--fs-label)/1.6 var(--pixel)}
+.sync-section{border-top:4px solid var(--ink);padding:32px 0}
+.sync-lead{margin:0 0 22px;color:var(--muted)}
+.sync-steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:18px}
+.sync-steps li{display:flex;gap:14px;align-items:flex-start;padding:14px;background:var(--hi);color:var(--ink);border:3px solid var(--ink);border-radius:4px;box-shadow:4px 4px 0 var(--gb1)}
+.sync-steps li::before,.sync-steps li::after{content:none;display:none}
+.sync-steps li,.sync-steps li:last-child{padding:14px}
+.sync-steps p{color:var(--muted)}
+.sync-no{flex:none;display:grid;place-items:center;width:34px;height:34px;background:var(--ink);color:var(--hi);font:var(--fs-label)/1 var(--pixel)}
+.sync-tag{display:inline-block;margin-bottom:6px;padding:3px 6px;border:2px solid var(--ink);background:var(--gb0);font:var(--fs-label)/1.4 var(--pixel)}
+.sync-steps h3{margin:0 0 6px;font-size:var(--fs-body)}
+.sync-steps p{margin:0;font-size:var(--fs-small)}
+.sync-note{margin:18px 0 0;color:var(--muted);font-size:var(--fs-small)}
 /* E-paper full refresh: the panel flashes inverted before settling. */
 .panel.refresh #epd{animation:epd-flash .6s steps(1) 1}
 @keyframes epd-flash{0%{filter:invert(1)}33%{filter:none}66%{filter:invert(1)}100%{filter:none}}

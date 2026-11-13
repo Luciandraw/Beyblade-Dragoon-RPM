@@ -20,6 +20,9 @@ class Storage {
   bool clear();
   bool saveCalibration(const SensorCalibration& calibration);
   bool loadCalibration(SensorCalibration& calibration);
+  // App sync (Bluetooth) mode, off by default.
+  bool loadBluetoothEnabled();
+  bool saveBluetoothEnabled(bool enabled);
   bool healthy() const { return healthy_; }
 
  private:

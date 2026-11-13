@@ -48,6 +48,7 @@ const device = {
   state: 'Boot', enteredAt: performance.now(), bladePresent: false, bladeArmed: false,
   history: [], best: 0, counter: 0, menuItem: 0, historyOffset: 0,
   historyView: false, graphView: false, clearConfirmation: false, serviceView: false,
+  bluetooth: false, bluetoothView: false,
   lastResult: null, lastProfile: [], sleeping: false, lastActivity: performance.now(),
   calibration: {minimum: 2000, maximum: 4095}
 };
@@ -57,7 +58,7 @@ let current = null;
 
 function show(name, data, note) {
   current = {name, data};
-  const {canvas, partial} = render(name, data);
+  const {canvas, partial} = render(name, data, device.bluetooth);
   paint(screen, canvas);
   if (!partial) { panel.classList.remove('refresh'); void panel.offsetWidth; panel.classList.add('refresh'); }
   if (note) statusLine.textContent = note;
@@ -72,7 +73,7 @@ function enterReady() {
   else show('insertBlade', stats(), 'Insert the blade to arm the launcher. Sensor is off to save power.');
 }
 function showMenu() {
-  device.historyView = device.graphView = device.clearConfirmation = false;
+  device.historyView = device.graphView = device.clearConfirmation = device.bluetoothView = false;
   show('menu', {item: device.menuItem}, 'Menu: click moves, double-click selects, hold goes back.');
 }
 function openHistory() {
@@ -81,6 +82,11 @@ function openHistory() {
   device.historyOffset = Math.min(device.historyOffset, count ? count - 1 : 0);
   const record = device.history[count - 1 - device.historyOffset] || null;
   show('history', {record, position: device.historyOffset, count}, 'History: click for the next launch, hold to go back.');
+}
+// No phone in the browser, so the emulated pass never reports a connection.
+function showBluetooth(note) {
+  device.bluetoothView = true;
+  show('bluetooth', {enabled: device.bluetooth, connected: false}, note);
 }
 function enterCalibration() {
   device.bladeArmed = false; setState('Calibrating');
@@ -131,17 +137,26 @@ function handleMenu(event) {
     return;
   }
   if (device.graphView) { if (event !== 'service') showMenu(); return; }
+  if (device.bluetoothView) {
+    if (event === 'double') {
+      device.bluetooth = !device.bluetooth;
+      showBluetooth(device.bluetooth ? 'Bluetooth on: the app can find BEYBLADE_TOOL01.' : 'Bluetooth off: the app cannot see the device.');
+    } else if (event === 'click') showBluetooth();
+    else if (event === 'long') showMenu();
+    return;
+  }
   if (device.historyView) {
     if (event === 'click' && device.history.length) { device.historyOffset = (device.historyOffset + 1) % device.history.length; openHistory(); }
     else if (event === 'long') showMenu();
     return;
   }
-  if (event === 'click') { device.menuItem = (device.menuItem + 1) % 5; showMenu(); }
+  if (event === 'click') { device.menuItem = (device.menuItem + 1) % 6; showMenu(); }
   else if (event === 'double') {
     if (device.menuItem === 0) openHistory();
     else if (device.menuItem === 1) { device.graphView = true; show('graph', {samples: device.lastProfile, peakRpm: device.lastResult?.peakRpm || 0}, 'Graph of the last launch. Any click returns.'); }
-    else if (device.menuItem === 2) enterCalibration();
-    else if (device.menuItem === 3) { device.clearConfirmation = true; show('clearConfirmation', {}, 'Double-click erases the history; click cancels.'); }
+    else if (device.menuItem === 2) showBluetooth('Bluetooth: double-click turns app sync on or off, hold goes back.');
+    else if (device.menuItem === 3) enterCalibration();
+    else if (device.menuItem === 4) { device.clearConfirmation = true; show('clearConfirmation', {}, 'Double-click erases the history; click cancels.'); }
     else enterReady();
   } else if (event === 'long') enterReady();
 }
@@ -225,6 +240,8 @@ const gallery = [
   ['result', {record: sampleRecord, bestRpm: 11240, newBest: false}, 'Result'],
   ['graph', {samples: sample.samples, peakRpm: sample.peakRpm}, 'Launch profile'],
   ['menu', {item: 0}, 'Menu'],
+  ['bluetooth', {enabled: true, connected: true}, 'Bluetooth'],
+  ['sync', {count: 14}, 'Data sent to the app'],
   ['history', {record: sampleRecord, position: 0, count: 14}, 'History'],
   ['clearConfirmation', {}, 'Clear history'],
   ['calibrating', {minimum: 2010, maximum: 4080}, 'Calibration'],
@@ -235,7 +252,8 @@ const galleryHost = document.querySelector('#gallery');
 for (const [name, data, label] of gallery) {
   const figure = document.createElement('figure'), canvas = document.createElement('canvas'), caption = document.createElement('figcaption');
   canvas.width = WIDTH; canvas.height = HEIGHT; canvas.setAttribute('role', 'img'); canvas.setAttribute('aria-label', label);
-  paint(canvas, render(name, data).canvas);
+  // Bluetooth is off by default; only its own screen shows it switched on.
+  paint(canvas, render(name, data, name === 'bluetooth' || name === 'sync').canvas);
   caption.textContent = label;
   figure.append(canvas, caption); galleryHost.append(figure);
 }

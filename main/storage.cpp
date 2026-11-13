@@ -65,6 +65,12 @@ bool Storage::loadCalibration(SensorCalibration& calibration) {
   return true;
 }
 
+bool Storage::loadBluetoothEnabled() { return preferences_.getBool("bt", false); }
+
+bool Storage::saveBluetoothEnabled(bool enabled) {
+  return preferences_.putBool("bt", enabled) == sizeof(bool);
+}
+
 bool Storage::clear() {
   data_ = PersistedData{};
   data_.magic = MAGIC;

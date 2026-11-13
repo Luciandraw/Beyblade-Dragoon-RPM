@@ -105,7 +105,7 @@ export class Canvas {
 }
 
 // ---- Helpers (display.cpp, anonymous namespace) ----
-let g, partialCount = 0;
+let g, partialCount = 0, bluetoothIcon = false;
 const textWidth = (value, size) => value.length * 6 * size;
 function text(value, x, y, size = 1, color = BLACK) { g.size = size; g.color = color; g.x = x; g.y = y; g.print(value); }
 const centered = (value, y, size = 1, color = BLACK) => text(value, div(200 - textWidth(value, size), 2), y, size, color);
@@ -123,10 +123,16 @@ function frame(x, y, w, h) {
 }
 function cursor(x, y, size = 1, color = BLACK) { for (let i = 0; i < 4 * size; ++i) g.drawFastVLine(x + i, y + i, 8 * size - 1 - 2 * i, color); }
 function prompt(x, y) { for (let i = 0; i < 4; ++i) g.drawFastHLine(x + i, y + i, 7 - 2 * i, BLACK); }
+function bluetoothRune(x, y, color) {
+  g.drawFastVLine(x + 3, y, 11, color);
+  g.drawLine(x + 3, y, x + 6, y + 3, color); g.drawLine(x + 6, y + 3, x, y + 8, color);
+  g.drawLine(x + 3, y + 10, x + 6, y + 7, color); g.drawLine(x + 6, y + 7, x, y + 2, color);
+}
 function header(title, right) {
   g.fillRect(0, 0, 200, 20, BLACK); g.fillRect(4, 3, 14, 14, WHITE);
   text('R', 8, 6, 1, BLACK); text(title, 24, 6, 1, WHITE);
   if (right) rightAligned(right, 195, 6, 1, WHITE);
+  if (bluetoothIcon) bluetoothRune(126, 4, WHITE);
 }
 function footer(left, right) {
   g.fillRect(0, 184, 200, 16, BLACK); text(left, 6, 188, 1, WHITE);
@@ -240,11 +246,33 @@ const screens = {
     return partial;
   },
   menu({item = 0} = {}) {
-    const items = ['HISTORY', 'GRAPH', 'CALIBRATE', 'CLEAR LOG', 'BACK'];
+    const items = ['HISTORY', 'GRAPH', 'BLUETOOTH', 'CALIBRATE', 'CLEAR LOG', 'BACK'];
     const partial = startFrame(true);
-    ground(); header('MENU'); frame(4, 26, 192, 140);
-    items.forEach((label, i) => { const y = 38 + i * 25; if (i === item) cursor(16, y, 2); text(label, 34, y, 2); });
+    ground(); header('MENU'); frame(4, 26, 192, 150);
+    items.forEach((label, i) => { const y = 38 + i * 22; if (i === item) cursor(16, y, 2); text(label, 34, y, 2); });
     footer('2X SELECT', 'HOLD BACK');
+    return partial;
+  },
+  bluetooth({enabled = true, connected = false} = {}) {
+    const partial = startFrame(true);
+    ground(); header('BLUETOOTH', enabled ? 'ON' : 'OFF');
+    frame(4, 26, 192, 84);
+    centered(!enabled ? 'OFF' : connected ? 'CONNECTED' : 'WAITING', 40, 2);
+    centered('BEYBLADE_TOOL01', 66);
+    centered(!enabled ? 'APP CANNOT SEE IT' : connected ? 'LAUNCHES GO TO APP' : 'SYNC IN THE APP', 84);
+    frame(4, 114, 192, 66);
+    cursor(14, 128, 1);
+    text(enabled ? '2X: TURN OFF' : '2X: TURN ON', 26, 128);
+    text('CLICK: REFRESH', 26, 144); text('HOLD: BACK', 26, 160);
+    footer('APP SYNC');
+    return partial;
+  },
+  sync({count = 0} = {}) {
+    const partial = startFrame(true);
+    ground(); header('BLUETOOTH', 'ON'); frame(4, 26, 192, 110);
+    centered('DATA SENT', 44, 2); centered('TO THE APP', 74);
+    centered(count ? `${count} LAUNCHES` : 'HISTORY EMPTY', 98);
+    footer('APP SYNC');
     return partial;
   },
   clearConfirmation() {
@@ -325,8 +353,9 @@ const screens = {
 export const SCREEN_NAMES = Object.keys(screens);
 
 // Draws a screen into a fresh canvas. Returns {canvas, partial}.
-export function render(name, data) {
-  g = new Canvas();
+// bluetooth: app sync mode on, which adds the rune to every header.
+export function render(name, data, bluetooth = false) {
+  g = new Canvas(); bluetoothIcon = bluetooth;
   const partial = screens[name](data);
   return {canvas: g, partial};
 }

@@ -1,4 +1,5 @@
 #include "app_state.h"
+#include "battle_pass.h"
 #include "buttons.h"
 #include "config.h"
 #include "display.h"
@@ -16,6 +17,7 @@ Display display;
 Sensor sensor;
 Storage storage;
 RpmCalculator rpm;
+BattlePass battlePass;
 
 static LaunchRecord lastResult;
 static RpmSample lastProfile[Config::PROFILE_SIZE];
@@ -26,13 +28,16 @@ static bool historyView = false;
 static bool graphView = false;
 static bool clearConfirmation = false;
 static bool serviceView = false;
+static bool bluetoothView = false;
+static bool bluetoothShownConnected = false;
+static uint32_t syncNoticeUntil = 0;
 static bool bladeArmed = false;
 static bool suppressWakeButton = false;
 static uint32_t serviceTransitions = 0;
 static uint32_t lastActivityMs = 0;
 
 void publishLaunchResult(const LaunchRecord& record) {
-  (void)record;
+  battlePass.publishLaunch(record, lastProfile, lastProfileCount);
 }
 
 void enterCalibration() {
@@ -98,8 +103,14 @@ void updatePowerMode() {
 }
 
 void showCurrentMenu() {
-  historyView = graphView = clearConfirmation = false;
+  historyView = graphView = clearConfirmation = bluetoothView = false;
   display.showMenu(menuItem);
+}
+
+void showBluetooth() {
+  bluetoothView = true;
+  bluetoothShownConnected = battlePass.connected();
+  display.showBluetooth(battlePass.enabled(), bluetoothShownConnected);
 }
 
 void openHistory() {
@@ -158,6 +169,20 @@ void handleMenu(const ButtonEvents& events) {
     if (events.centerPressed || events.centerDouble || events.centerLong) showCurrentMenu();
     return;
   }
+  if (bluetoothView) {
+    if (events.centerDouble) {
+      const bool enabled = !battlePass.enabled();
+      battlePass.setEnabled(enabled);
+      if (!storage.saveBluetoothEnabled(enabled)) Serial.println("BBP: save failed");
+      display.setBluetoothIcon(enabled);
+      showBluetooth();
+    } else if (events.centerPressed) {
+      showBluetooth();
+    } else if (events.centerLong) {
+      showCurrentMenu();
+    }
+    return;
+  }
   if (historyView) {
     if (events.centerPressed && storage.count()) {
       historyOffset = (historyOffset + 1) % storage.count();
@@ -168,7 +193,7 @@ void handleMenu(const ButtonEvents& events) {
     return;
   }
   if (events.centerPressed) {
-    menuItem = (menuItem + 1) % 5; display.showMenu(menuItem);
+    menuItem = (menuItem + 1) % 6; display.showMenu(menuItem);
   } else if (events.centerDouble) {
     switch (menuItem) {
       case 0: openHistory(); break;
@@ -177,8 +202,9 @@ void handleMenu(const ButtonEvents& events) {
         display.showGraph(lastProfileCount ? lastProfile : nullptr,
                           lastProfileCount, lastResult.peakRpm);
         break;
-      case 2: enterCalibration(); break;
-      case 3: clearConfirmation = true; display.showClearConfirmation(); break;
+      case 2: showBluetooth(); break;
+      case 3: enterCalibration(); break;
+      case 4: clearConfirmation = true; display.showClearConfirmation(); break;
       default: enterReady(); break;
     }
   } else if (events.centerLong) {
@@ -214,6 +240,9 @@ void setup() {
   Serial.println("EPD: initializing");
   display.begin();
   Serial.println("EPD: initialization returned");
+  const bool bluetooth = storage.loadBluetoothEnabled();
+  display.setBluetoothIcon(bluetooth);
+  battlePass.begin(bluetooth);
   app.set(AppState::Boot);
   if (!wokeFromSleep) {
     display.showBoot();
@@ -242,6 +271,28 @@ void loop() {
       events.bladeInserted || events.bladeRemoved) {
     lastActivityMs = millis();
   }
+  // The pass reports its button while it is held (the app asks for a ~1 s
+  // press when registering and syncing), whatever the screen does with it.
+  battlePass.setButtonHeld(buttons.centerDown() && app.get() != AppState::Measuring);
+  // BLE pages are paced with delays; keep them out of an active measurement.
+  if (app.get() != AppState::Measuring &&
+      battlePass.update(app.get() == AppState::Ready && bladeArmed)) {
+    lastActivityMs = millis();
+  }
+  // Tell the user the app has just received the history, then restore the screen.
+  uint8_t syncedCount = 0;
+  if (battlePass.takeSync(syncedCount) &&
+      (app.get() == AppState::Ready || (app.get() == AppState::Menu && bluetoothView))) {
+    syncNoticeUntil = millis() + Config::SYNC_NOTICE_MS;
+    display.showSync(syncedCount);
+  } else if (syncNoticeUntil &&
+             (events.centerPressed || events.centerDouble || events.centerLong ||
+              static_cast<int32_t>(millis() - syncNoticeUntil) >= 0)) {
+    syncNoticeUntil = 0;
+    if (app.get() == AppState::Ready) enterReady();
+    else if (bluetoothView) showBluetooth();
+  }
+  if (!syncNoticeUntil && bluetoothView && battlePass.connected() != bluetoothShownConnected) showBluetooth();
   if (events.bladeInserted && app.get() == AppState::Ready && !bladeArmed) {
     bladeArmed = true;
     rpm.reset();
@@ -276,6 +327,8 @@ void loop() {
   }
 
   updatePowerMode();
+  // Sleep would drop the app's connection; the timer restarts on disconnect.
+  if (battlePass.connected()) lastActivityMs = millis();
   const AppState currentState = app.get();
   if (currentState != AppState::Measuring &&
       currentState != AppState::Calibrating &&
@@ -328,7 +381,9 @@ void loop() {
     case AppState::Ready:
       if (events.centerPressed) {
         app.set(AppState::Menu); menuItem = 0; showCurrentMenu();
-      } else if (events.centerLong) {
+      } else if (events.centerLong && !battlePass.connected()) {
+        // While the app is connected a ~1 s hold is the pass's power-on press
+        // (the app asks for it when registering); calibrate from the menu then.
         enterCalibration();
       }
       break;

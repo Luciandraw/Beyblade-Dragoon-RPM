@@ -70,10 +70,14 @@ constexpr uint16_t PROFILE_SIZE = 192;
 constexpr uint8_t FULL_REFRESH_AFTER_PARTIAL = 6;
 constexpr uint32_t RESULT_SCREEN_MS = 5000;
 constexpr uint32_t INACTIVITY_SLEEP_MS = 60000;
+// How long the "data sent to the app" notice stays on screen.
+constexpr uint32_t SYNC_NOTICE_MS = 2500;
 
 constexpr bool DEBUG_SENSOR = false;
 constexpr bool DEBUG_RPM = false;
 constexpr bool DEBUG_BUTTONS = false;
+// Logs the app sync traffic: commands from the app and pages sent back.
+constexpr bool DEBUG_APP_SYNC = false;
 
 // Hardware assumption: WeAct 1.54 inch, 200x200, SSD1681/GDEY0154D67.
 // Change the panel type in display.cpp if the label on the flex cable differs.

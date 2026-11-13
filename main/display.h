@@ -24,6 +24,11 @@ class Display {
   void showSensorError(uint16_t minimum, uint16_t maximum);
   void showHistory(const LaunchRecord* record, uint8_t position, uint8_t count);
   void showMenu(uint8_t item);
+  void showBluetooth(bool enabled, bool connected);
+  // Notice that the app has just received `count` launches.
+  void showSync(uint8_t count);
+  // Shows the Bluetooth rune in every later header while app sync is on.
+  void setBluetoothIcon(bool visible) { bluetoothIcon_ = visible; }
   void showClearConfirmation();
   void showService(uint16_t raw, uint16_t minimum, uint16_t maximum,
                    uint16_t thresholdLow, uint16_t thresholdHigh,
@@ -35,6 +40,7 @@ class Display {
   static void renderTask(void* self);
 
   bool available_ = false;
+  bool bluetoothIcon_ = false;
   SemaphoreHandle_t lock_ = nullptr;
   TaskHandle_t task_ = nullptr;
   std::function<void()> pending_;

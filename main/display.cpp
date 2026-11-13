@@ -24,6 +24,8 @@ namespace {
 constexpr uint16_t BLACK = GxEPD_BLACK;
 constexpr uint16_t WHITE = GxEPD_WHITE;
 uint8_t partialCount = 0;
+// Captured with each queued screen so a redraw shows the state it was posted with.
+bool bluetoothIcon = false;
 
 void startFrame(bool partial = false) {
   if (partial && partialCount < Config::FULL_REFRESH_AFTER_PARTIAL) {
@@ -89,12 +91,23 @@ void prompt(int16_t x, int16_t y) {
   for (int16_t i = 0; i < 4; ++i) epd.drawFastHLine(x + i, y + i, 7 - 2 * i, BLACK);
 }
 
+// Bluetooth rune, 7 x 11 px.
+void bluetoothRune(int16_t x, int16_t y, uint16_t color) {
+  epd.drawFastVLine(x + 3, y, 11, color);
+  epd.drawLine(x + 3, y, x + 6, y + 3, color);
+  epd.drawLine(x + 6, y + 3, x, y + 8, color);
+  epd.drawLine(x + 3, y + 10, x + 6, y + 7, color);
+  epd.drawLine(x + 6, y + 7, x, y + 2, color);
+}
+
 void header(const char* title, const char* right = nullptr) {
   epd.fillRect(0, 0, 200, 20, BLACK);
   epd.fillRect(4, 3, 14, 14, WHITE);
   text("R", 8, 6, 1, BLACK);
   text(title, 24, 6, 1, WHITE);
   if (right) rightAligned(right, 195, 6, 1, WHITE);
+  // Between the longest title (LAUNCH PROFILE) and the widest right label.
+  if (bluetoothIcon) bluetoothRune(126, 4, WHITE);
 }
 
 void footer(const char* left, const char* right = nullptr) {
@@ -294,18 +307,54 @@ void drawHistory(bool hasRecord, const LaunchRecord& record, uint8_t position, u
 }
 
 void drawMenu(uint8_t item) {
-  static const char* const items[] = {"HISTORY", "GRAPH", "CALIBRATE", "CLEAR LOG", "BACK"};
+  static const char* const items[] = {"HISTORY", "GRAPH", "BLUETOOTH",
+                                      "CALIBRATE", "CLEAR LOG", "BACK"};
   startFrame(true);
   do {
     ground();
     header("MENU");
-    frame(4, 26, 192, 140);
-    for (uint8_t i = 0; i < 5; ++i) {
-      const int16_t y = 38 + i * 25;
+    frame(4, 26, 192, 150);
+    for (uint8_t i = 0; i < 6; ++i) {
+      const int16_t y = 38 + i * 22;
       if (i == item) cursor(16, y, 2);
       text(items[i], 34, y, 2);
     }
     footer("2X SELECT", "HOLD BACK");
+  } while (epd.nextPage());
+}
+
+void drawBluetooth(bool enabled, bool connected) {
+  startFrame(true);
+  do {
+    ground();
+    header("BLUETOOTH", enabled ? "ON" : "OFF");
+    frame(4, 26, 192, 84);
+    centered(!enabled ? "OFF" : connected ? "CONNECTED" : "WAITING", 40, 2);
+    centered("BEYBLADE_TOOL01", 66);
+    centered(!enabled ? "APP CANNOT SEE IT"
+             : connected ? "LAUNCHES GO TO APP" : "SYNC IN THE APP", 84);
+    frame(4, 114, 192, 66);
+    cursor(14, 128, 1);
+    text(enabled ? "2X: TURN OFF" : "2X: TURN ON", 26, 128);
+    text("CLICK: REFRESH", 26, 144);
+    text("HOLD: BACK", 26, 160);
+    footer("APP SYNC");
+  } while (epd.nextPage());
+}
+
+void drawSync(uint8_t count) {
+  startFrame(true);
+  do {
+    ground();
+    header("BLUETOOTH", "ON");
+    frame(4, 26, 192, 110);
+    centered("DATA SENT", 44, 2);
+    centered("TO THE APP", 74, 1);
+    char line[24];
+    if (count) snprintf(line, sizeof(line), "%u LAUNCHES", count);
+    else snprintf(line, sizeof(line), "HISTORY EMPTY");
+    centered(line, 98, 1);
+    footer("APP SYNC");
   } while (epd.nextPage());
 }
 
@@ -488,6 +537,11 @@ void Display::renderTask(void* arg) {
 }
 
 void Display::post(std::function<void()> job) {
+  const bool icon = bluetoothIcon_;
+  job = [icon, draw = std::move(job)] {
+    bluetoothIcon = icon;
+    draw();
+  };
   if (!task_) {  // No render task: draw synchronously, as before.
     job();
     return;
@@ -545,6 +599,12 @@ void Display::showHistory(const LaunchRecord* record, uint8_t position, uint8_t 
 }
 
 void Display::showMenu(uint8_t item) { post([=] { drawMenu(item); }); }
+
+void Display::showBluetooth(bool enabled, bool connected) {
+  post([=] { drawBluetooth(enabled, connected); });
+}
+
+void Display::showSync(uint8_t count) { post([=] { drawSync(count); }); }
 
 void Display::showClearConfirmation() { post([] { drawClearConfirmation(); }); }
 
