@@ -42,11 +42,11 @@ All links below are AliExpress alternatives. Delivery availability, taxes and di
 | Charge + DC-DC boost module | [Module](https://www.aliexpress.com/item/1005009566821602.html) | ~4.73* | ~$1.27* |
 | QRE1113 analog module | [Sensor](https://www.aliexpress.com/item/1005008965289337.html) | ~4.89* | ~$1.31* |
 | WeAct 1.54-inch, 200 × 200 e-paper | [Display](https://www.aliexpress.com/item/1005006291142235.html) | ~32.09* | ~$8.61* |
-| Central momentary button | [Button](https://www.aliexpress.com/item/32995711724.html) | ~8.34* | ~$2.24* |
+| Central momentary button | [6 × 6 × 10 mm, pack of 50](https://www.aliexpress.com/item/32995711724.html) | 10.03 | $2.69 |
 | BeySense blade-present button | [Button](https://www.aliexpress.com/item/1005005473521127.html) | ~5.92* | ~$1.59* |
 | Power slide switch | [Switch](https://www.aliexpress.com/item/1005008240336192.html) / [MSK-12D19 alternative](https://www.aliexpress.com/item/4001202080623.html) | ~13.01* | ~$3.49* |
 | LiPo battery | [1 battery, 602020, 3.7 V, 200 mAh](https://www.aliexpress.com/item/32664248150.html) | 21.89 | $5.87 |
-| **Indicative total — all 8 listed components** | | **~108.79 zł** | **~$29.19** |
+| **Indicative total — all 8 listed components** | | **~110.48 zł** | **~$29.65** |
 
 *Saved URL prices may apply to a different variant or promotional offer. The estimate counts each saved listing price once per row, not a verified pack quantity. The MSK-12D19 alternative has a saved price of **~7.39 zł (~$1.98)** and is not added to the subtotal.*
 
@@ -143,7 +143,7 @@ The firmware does not automatically double RPM after a long period: a single opt
 | Sourcing option | Priced items | Amount PLN | Amount USD | Status / limitations |
 |---|---|---:|---:|---|
 | **Poland** | 8 of 8 | **155.99 zł** | **$41.86** | All listed components included; shipping and assembly supplies excluded |
-| **Worldwide / AliExpress** | 8 of 8; 6 URL estimates | **~108.79 zł** | **~$29.19** | All listed components included; estimated variants/pack sizes need confirmation |
+| **Worldwide / AliExpress** | 8 of 8; 5 URL estimates | **~110.48 zł** | **~$29.65** | All listed components included; estimated variants/pack sizes need confirmation |
 
 **Both totals cover the 8 listed components. AliExpress remains an indicative estimate, not a verified checkout total.** The two shopping lists are independent: do not add their amounts together. Full packs are counted where specified, rather than just the individual parts consumed in one build.
  **screws** are not priced and must be budgeted separately.
