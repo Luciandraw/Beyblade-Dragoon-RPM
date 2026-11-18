@@ -22,13 +22,13 @@ Prices below use Polish suppliers only.
 |---|---|---|---:|
 | ESP32-S3-Zero | 1 board | [Elektroweb][pl-esp] / [Allegro alternative](https://allegro.pl/produkt/sterownik-elektroweb-esp32-s3-zero-waveshare-wi-fi-2-4ghz-ble-ef6b7981-b6df-4aea-857e-138e2bef4ac1?offerId=18479170722) | 34.90 |
 | Charge + DC-DC boost module | 1 module | [Allegro][pl-boost] | 4.90 |
-| QRE1113 analog module | 1 module | [Botland][pl-sensor] | 21.90 |
+| QRE1113 analog module | 1 module | [Botland][pl-sensor] / [Kamami](https://kamami.pl/czujniki-odbiciowe/201014-sparkfun-modul-z-czujnikiem-odbiciowym-qre1113-analogowy-rob-09453-5906623477425.html) | 21.90 |
 | WeAct 1.54-inch, 200 × 200 e-paper | 1 display | [Elektroweb][pl-screen] / [Allegro alternative](https://allegro.pl/produkt/wyswietlacz-elektroweb-1-54-od-weact-spi-3-3v-5v-91174db3-afa0-4ec1-974b-52413aeab759?offerId=17700495465) | 42.70 |
-| Central button, 6 × 6 × 13 mm | Pack of 5; one used | [Botland][pl-central] | 0.99 |
+| Central button, 6 × 6 × 10 mm (or 13 mm) | Pack of 10; one used | [Allegro, 10 mm][pl-central] / [Allegro, 13 mm](https://allegro.pl/produkt/tact-micro-switch-mikroprzycisk-h-13mm-6x6-10szt-6889f499-8a09-448b-95c2-1da291e364fd?offerId=17832190310) | 7.02 |
 | BeySense blade-present button | Pack of 10; one used | [Allegro][pl-beysense] | 5.37 |
-| SS22T35 power slide switch | Pack of 5; one used | [Botland][pl-switch] | 5.90 |
-| LiPo battery, 602020, 3.7 V, 200 mAh | 1 battery | [Allegro][pl-battery] | 22.90 |
-| **Total — all 8 listed components** | | | **139.56 zł ≈ $37.45** |
+| Power slide switch, 9 × 4 × 4 mm, 3-pin | 1 switch | [Allegro][pl-switch] | 2.30 |
+| LiPo battery, 602020, 3.7 V, 200 mAh | 1 battery | [Allegro][pl-battery] | 36.90 |
+| **Total — all 8 listed components** | | | **155.99 zł ≈ $41.86** |
 
 Prices refer to the first supplier in each row; alternative sellers are not counted again.
 
@@ -42,11 +42,11 @@ All links below are AliExpress alternatives. Delivery availability, taxes and di
 | Charge + DC-DC boost module | [Module](https://www.aliexpress.com/item/1005009566821602.html) | ~4.73* | ~$1.27* |
 | QRE1113 analog module | [Sensor](https://www.aliexpress.com/item/1005008965289337.html) | ~4.89* | ~$1.31* |
 | WeAct 1.54-inch, 200 × 200 e-paper | [Display](https://www.aliexpress.com/item/1005006291142235.html) | ~32.09* | ~$8.61* |
-| Central momentary button | [6 × 6 × 12 mm](https://www.aliexpress.com/item/1005007324455095.html) | ~10.20* | ~$2.74* |
+| Central momentary button | [Button](https://www.aliexpress.com/item/32995711724.html) | ~8.34* | ~$2.24* |
 | BeySense blade-present button | [Button](https://www.aliexpress.com/item/1005005473521127.html) | ~5.92* | ~$1.59* |
 | Power slide switch | [Switch](https://www.aliexpress.com/item/1005008240336192.html) / [MSK-12D19 alternative](https://www.aliexpress.com/item/4001202080623.html) | ~13.01* | ~$3.49* |
 | LiPo battery | [1 battery, 602020, 3.7 V, 200 mAh](https://www.aliexpress.com/item/32664248150.html) | 21.89 | $5.87 |
-| **Indicative total — all 8 listed components** | | **~110.65 zł** | **~$29.69** |
+| **Indicative total — all 8 listed components** | | **~108.79 zł** | **~$29.19** |
 
 *Saved URL prices may apply to a different variant or promotional offer. The estimate counts each saved listing price once per row, not a verified pack quantity. The MSK-12D19 alternative has a saved price of **~7.39 zł (~$1.98)** and is not added to the subtotal.*
 
@@ -142,8 +142,8 @@ The firmware does not automatically double RPM after a long period: a single opt
 
 | Sourcing option | Priced items | Amount PLN | Amount USD | Status / limitations |
 |---|---|---:|---:|---|
-| **Poland** | 8 of 8 | **139.56 zł** | **$37.45** | All listed components included; shipping and assembly supplies excluded |
-| **Worldwide / AliExpress** | 8 of 8; 6 URL estimates | **~110.65 zł** | **~$29.69** | All listed components included; estimated variants/pack sizes need confirmation |
+| **Poland** | 8 of 8 | **155.99 zł** | **$41.86** | All listed components included; shipping and assembly supplies excluded |
+| **Worldwide / AliExpress** | 8 of 8; 6 URL estimates | **~108.79 zł** | **~$29.19** | All listed components included; estimated variants/pack sizes need confirmation |
 
 **Both totals cover the 8 listed components. AliExpress remains an indicative estimate, not a verified checkout total.** The two shopping lists are independent: do not add their amounts together. Full packs are counted where specified, rather than just the individual parts consumed in one build.
  **screws** are not priced and must be budgeted separately.
@@ -161,9 +161,9 @@ Independent fan project, not affiliated with Takara Tomy or Hasbro. Beyblade is 
 [pl-boost]: https://allegro.pl/produkt/ladowarka-li-ion-tp4056-z-przetwornica-dc-4-3-28v-97401841-c49c-4884-a7b6-5f43c8eaeeaa?offerId=15794012707
 [pl-sensor]: https://botland.com.pl/czujniki-odbiciowe/7684-qre1113-czujnik-odbiciowy-analogowy-sparkfun-rob-09453-5904422304867.html
 [pl-screen]: https://elektroweb.pl/pl/e-paper/2072-wyswietlacz-e-paper-200x200-czarno-bialy-154-od-weact-spi-33v-5v.html
-[pl-central]: https://botland.com.pl/tact-switch/380-tact-switch-6x6mm-13mm-tht-5szt-5904422307608.html
+[pl-central]: https://allegro.pl/produkt/tact-switch-6x6mm-h-10mm-10szt-c8b57d35-fb5a-4063-98fc-838a1f4f8014?offerId=7017156465
 [pl-beysense]: https://allegro.pl/produkt/tact-switch-smd-6x6mm-h-3-4mm-czerwony-niski-3d75d2bf-592b-4ecc-8c0d-1ee1b312e8ed?offerId=7883778097
-[pl-switch]: https://botland.com.pl/przelaczniki-suwakowe-i-przesuwne/8052-przelacznik-suwakowy-ss22t35-2-pozycyjny-5szt-5904422336172.html
-[pl-battery]: https://allegro.pl/oferta/akumulator-pryzmatyczny-3-7v-200mah-lipo-602020-4404-18813108295
+[pl-switch]: https://allegro.pl/oferta/przelacznik-suwakowy-9x4x4mm-3-pin-2-pozycje-2304-11557960035
+[pl-battery]: https://allegro.pl/produkt/akumulator-pryzmatyczny-3-7v-200mah-lipo-602020-4404-c124a11b-390b-4b2a-89a0-8ccde68a92f9?offerId=18927399261
 
 
